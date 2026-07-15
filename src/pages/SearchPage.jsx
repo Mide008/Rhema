@@ -1,0 +1,130 @@
+import { useState, useEffect } from 'react'
+import { useApp } from '@/lib/AppContext'
+import { useAI } from '@/lib/useAI'
+import { useTranslation } from '@/hooks/useTranslation'
+import { RevealCard } from '@/components/ui/MotionComponents'
+import EmptyState from '@/components/ui/EmptyState'
+
+export default function SearchPage() {
+  const { showToast } = useApp()
+  const { ask, loading } = useAI()
+  const { t } = useTranslation()
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [hasSearched, setHasSearched] = useState(false)
+
+  useEffect(() => {
+    const savedQuery = sessionStorage.getItem('rhema_search_query')
+    if (savedQuery) {
+      setQuery(savedQuery)
+      sessionStorage.removeItem('rhema_search_query')
+      setTimeout(() => handleSearch(), 300)
+    }
+  }, [])
+
+  const handleSearch = async (e) => {
+    e?.preventDefault()
+    if (!query.trim()) {
+      showToast('Please enter a search term', '⚠️')
+      return
+    }
+
+    setHasSearched(true)
+    setResults([])
+
+    try {
+      const prompt = `
+        You are a pastoral AI assistant. The user is searching for scripture guidance.
+        Their search: "${query}".
+        Suggest 4-6 relevant Bible verses. For each, provide the reference, the full verse text, and a brief reason.
+        Return a valid JSON object with no extra text:
+        {
+          "verses": [
+            { "reference": "Isaiah 41:10", "text": "Fear not, for I am with you...", "reason": "God promises his presence." },
+            ...
+          ],
+          "pastoral_note": "A warm, encouraging message (2-3 sentences)."
+        }
+        Do not include any markdown or extra text. Return ONLY the JSON.
+      `
+      const response = await ask(prompt)
+      if (response) {
+        let parsed
+        try {
+          const jsonMatch = response.match(/\{[\s\S]*\}/)
+          parsed = JSON.parse(jsonMatch ? jsonMatch[0] : response)
+        } catch {
+          parsed = { verses: [], pastoral_note: response }
+        }
+        setResults(parsed.verses || [])
+        if (parsed.verses?.length === 0) {
+          showToast(t('noVersesFound'), '📖')
+        } else {
+          showToast(`${parsed.verses.length} ${t('versesFound')}`, '✨')
+        }
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+      showToast(t('aiRequestFailed'), '❌')
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <RevealCard>
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10 }}>
+          <input
+            className="input-search"
+            placeholder="Search the Bible by topic, feeling, or situation..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={{ flex: 1 }}
+            autoFocus
+          />
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? '...' : '🔍 Search'}
+          </button>
+        </form>
+      </RevealCard>
+
+      {loading && (
+        <div style={{ textAlign: 'center', padding: 40 }}>
+          <div className="loading-dots">
+            <div className="loading-dot" />
+            <div className="loading-dot" />
+            <div className="loading-dot" />
+          </div>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 12 }}>
+            {t('searching')}
+          </p>
+        </div>
+      )}
+
+      {!loading && hasSearched && results.length === 0 && (
+        <EmptyState
+          icon="📖"
+          headline={t('noVersesFound')}
+          body={`We couldn't find verses for "${query}". Try different words or a mood.`}
+          ctaLabel="Try again"
+          onCta={() => { setQuery(''); setHasSearched(false); }}
+        />
+      )}
+
+      {!loading && results.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {results.map((verse, idx) => (
+            <div key={idx} className="verse-card">
+              <span className="verse-ref">{verse.reference}</span>
+              <p className="verse-text">{verse.text || `[${verse.reference}]`}</p>
+              {verse.reason && (
+                <p className="verse-note" style={{ fontSize: 13, color: 'var(--ink-500)' }}>
+                  {verse.reason}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,24 @@
+import { motion } from 'framer-motion'
+import { useApp } from '@/lib/AppContext'
+const TITLES={home:'Dashboard',bible:'Bible Reader',inspire:'Inspiration',search:'Topic Search',sermon:'Sermon Studio',sunday:'Sunday Pack',social:'Social Pack',study:'Study Guide',prayer:'Prayer Desk',saved:'Saved Verses',settings:'Settings'}
+export default function TopBar(){
+  const{activePage,setSidebarOpen,user}=useApp()
+  const h=new Date().getHours()
+  const gr=h<12?'Good morning':h<17?'Good afternoon':'Good evening'
+  return(
+    <header style={{height:'var(--topbar-h)',background:'rgba(255,255,255,0.94)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',borderBottom:'1px solid var(--border-subtle)',display:'flex',alignItems:'center',padding:'0 var(--space-8)',position:'sticky',top:0,zIndex:'var(--z-above)'}}>
+      <button className="mobile-only" onClick={()=>setSidebarOpen(true)} style={{marginRight:12,background:'none',border:'none',cursor:'pointer',fontSize:20,color:'var(--text-secondary)',display:'flex',alignItems:'center',padding:6}}>☰</button>
+      <motion.div key={activePage} initial={{opacity:0,y:4}} animate={{opacity:1,y:0}} transition={{duration:0.2}} style={{flex:1}}>
+        {activePage==='home'?(
+          <div><div style={{fontSize:13,fontFamily:'var(--font-serif)',color:'var(--text-muted)',lineHeight:1}}>{gr},</div><div style={{fontSize:18,fontFamily:'var(--font-serif)',fontWeight:500,color:'var(--text-primary)',lineHeight:1.2}}>{user?.name||'Friend'}</div></div>
+        ):(
+          <h1 style={{fontSize:18,fontFamily:'var(--font-serif)',fontWeight:500,color:'var(--text-primary)'}}>{TITLES[activePage]||''}</h1>
+        )}
+      </motion.div>
+      <div style={{display:'flex',alignItems:'center',gap:10}}>
+        <button style={{background:'none',border:'none',cursor:'pointer',fontSize:18,color:'var(--text-muted)',position:'relative',display:'flex',padding:6}}>🔔<span style={{position:'absolute',top:4,right:4,width:7,height:7,borderRadius:'50%',background:'var(--gold-500)',border:'2px solid #FFF'}}/></button>
+        <div style={{width:34,height:34,borderRadius:'50%',background:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'var(--ink-900)',cursor:'pointer',boxShadow:'var(--shadow-sm)',flexShrink:0}}>{(user?.name||'R').slice(0,2).toUpperCase()}</div>
+      </div>
+    </header>
+  )
+}

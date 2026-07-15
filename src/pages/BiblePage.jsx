@@ -1,0 +1,230 @@
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useApp } from '@/lib/AppContext'
+import { useAI } from '@/lib/useAI'
+import { useTranslation } from '@/hooks/useTranslation'
+import { BIBLE_BOOKS, POPULAR_BOOKS, TRANSLATIONS, SAMPLE_CHAPTERS } from '@/lib/bibleData'
+import { VERSE_PROMPTS } from '@/lib/aiServices'
+import { RevealCard } from '@/components/ui/MotionComponents'
+
+export default function BiblePage(){
+  const { t } = useTranslation()
+  const {saveVerse,savedVerses,showToast,setActivePage,setPendingVerse,verseNotes,addVerseNote}=useApp()
+  const {ask,loading}=useAI()
+  const [view,setView]=useState('books')
+  const [book,setBook]=useState(null)
+  const [ch,setCh]=useState(1)
+  const [tran,setTran]=useState('KJV')
+  const [testament,setTestament]=useState('All')
+  const [bSearch,setBSearch]=useState('')
+  const [selected,setSelected]=useState(null)
+  const [actionSheet,setActionSheet]=useState(false)
+  const [aiResult,setAiResult]=useState(null)
+  const [aiType,setAiType]=useState('')
+  const [commentary,setCommentary]=useState(null)
+
+  const filtered=BIBLE_BOOKS.filter(b=>{
+    const tm=testament==='All'||b.testament===testament
+    const sm=!bSearch||b.name.toLowerCase().includes(bSearch.toLowerCase())
+    return tm&&sm
+  })
+  const popular=BIBLE_BOOKS.filter(b=>POPULAR_BOOKS.includes(b.name))
+  const chKey=book?`${book.name==='Psalms'?'Psalm':book.name} ${ch}`:null
+  const verses=chKey&&SAMPLE_CHAPTERS[chKey]?SAMPLE_CHAPTERS[chKey]:book?Array.from({length:15},(_,i)=>({v:i+1,text:`[${book.name} ${ch}:${i+1} — ${tran}] In production, this loads from the api.bible API with your selected translation.`})):[]
+
+  const openAction=(v)=>{setSelected(v);setActionSheet(true);setAiResult(null);setAiType('')}
+  const closeAction=()=>{setSelected(null);setActionSheet(false);setAiResult(null)}
+
+  const doAI=async(type)=>{
+    if(!selected)return
+    setAiType(type);setAiResult(null)
+    const ref=`${book?.name} ${ch}:${selected.v}`
+    let prompt
+    if(type==='explain')prompt=VERSE_PROMPTS.explain(ref,selected.text)
+    else if(type==='preach')prompt=VERSE_PROMPTS.preachingAngle(ref,selected.text)
+    else if(type==='counsel')prompt=VERSE_PROMPTS.counsellingAngle(ref,selected.text)
+    else if(type==='youth')prompt=VERSE_PROMPTS.youthExplanation(ref,selected.text)
+    if(prompt){const r=await ask(prompt);if(r)setAiResult(r)}
+  }
+
+  const doAction=(type)=>{
+    if(!selected||!book)return
+    const ref=`${book.name} ${ch}:${selected.v}`
+    if(type==='save'){saveVerse({ref,translation:tran,text:selected.text,collection:'General'})}
+    else if(type==='copy'){navigator.clipboard.writeText(`${selected.text} — ${ref} (${tran})`).catch(()=>{});showToast(t('copied'),'📋')}
+    else if(type==='share'){const m=`*${ref}* (${tran})\n\n_${selected.text}_\n\n— Rhema AI · OmniCraft Studios 📖`;window.open(`https://wa.me/?text=${encodeURIComponent(m)}`,'_blank');showToast(t('shareToWhatsApp'),'💬')}
+    else if(type==='addSermon'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('sermon');showToast(t('verseReadySermon') || 'Verse ready for sermon','🎙')}
+    else if(type==='addPrayer'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('prayer');showToast(t('verseReadyPrayer') || 'Verse ready for prayer','🙏')}
+    else if(type==='addStudy'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('study');showToast(t('verseReadyStudy') || 'Verse ready for study guide','📚')}
+    else if(type==='note'){const n=prompt(`Note for ${ref}:`);if(n)addVerseNote(ref,selected.text,n,null)}
+    closeAction()
+  }
+
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:20}}>
+      <AnimatePresence mode="wait">
+        {view==='books'&&(
+          <motion.div key="books" initial={{opacity:0,x:-12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:12}} style={{display:'flex',flexDirection:'column',gap:16}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{position:'relative',flex:1}}>
+                <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',fontSize:15,pointerEvents:'none'}}>🔍</span>
+                <input className="input-field" style={{paddingLeft:36}} placeholder={t('searchBooks')} value={bSearch} onChange={e=>setBSearch(e.target.value)}/>
+              </div>
+              <select className="select-field" style={{width:'auto',minWidth:80}} value={tran} onChange={e=>setTran(e.target.value)}>
+                {TRANSLATIONS.map(t=><option key={t.code} value={t.code}>{t.code}</option>)}
+              </select>
+            </div>
+            {/* Translation info */}
+            <div style={{padding:'10px 14px',background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,fontSize:12,color:'var(--gold-800)'}}>
+              <strong>{TRANSLATIONS.find(t=>t.code===tran)?.name}</strong> — {TRANSLATIONS.find(t=>t.code===tran)?.notes}
+            </div>
+            {/* All translations picker */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+              {TRANSLATIONS.map(t=><button key={t.code} title={t.name} onClick={()=>setTran(t.code)} className={`tag ${tran===t.code?'tag-dark':'tag-ink'}`} style={{cursor:'pointer',padding:'5px 10px',fontSize:11,fontWeight:tran===t.code?600:400}}>{t.code}</button>)}
+            </div>
+            <div style={{display:'flex',gap:8}}>
+              {['All','OT','NT'].map(t=>{
+                const label = t==='OT' ? t('oldTestament') : t==='NT' ? t('newTestament') : t('allBooks')
+                return <button key={t} onClick={()=>setTestament(t)} className={`btn btn-sm ${testament===t?'btn-primary':'btn-outline'}`}>{label}</button>
+              })}
+            </div>
+            {!bSearch&&testament==='All'&&(
+              <div>
+                <div style={{fontSize:11,fontWeight:500,color:'var(--text-muted)',letterSpacing:'0.07em',textTransform:'uppercase',marginBottom:10}}>{t('popularBooks')}</div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                  {popular.map(b=><motion.button key={b.name} whileTap={{scale:0.96}} className="tag tag-gold" style={{cursor:'pointer',padding:'7px 14px',fontSize:13}} onClick={()=>{setBook(b);setCh(1);setView(b.chapters>1?'chapters':'reading')}}>{b.name}</motion.button>)}
+                </div>
+              </div>
+            )}
+            <div style={{display:'flex',flexDirection:'column',gap:2}}>
+              {filtered.map(b=>(
+                <motion.button key={b.name} whileHover={{background:'var(--gold-50)',x:2}} whileTap={{scale:0.99}} onClick={()=>{setBook(b);setCh(1);setView(b.chapters>1?'chapters':'reading')}}
+                  style={{display:'flex',alignItems:'center',padding:'11px 14px',borderRadius:'var(--radius-md)',cursor:'pointer',background:'transparent',border:'none',textAlign:'left',transition:'background var(--dur-fast) ease'}}>
+                  <div style={{flex:1}}>
+                    <span style={{fontSize:14.5,fontWeight:500,color:'var(--text-primary)'}}>{b.name}</span>
+                    <span style={{fontSize:11,color:'var(--text-muted)',marginLeft:8}}>{b.chapters} {t('chapters')}</span>
+                  </div>
+                  <span className="tag" style={{fontSize:10,background:b.testament==='NT'?'var(--gold-100)':'var(--ink-100)',color:b.testament==='NT'?'var(--gold-800)':'var(--ink-500)'}}>{b.testament}</span>
+                  <span style={{color:'var(--ink-200)',marginLeft:8,fontSize:14}}>›</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {view==='chapters'&&book&&(
+          <motion.div key="chapters" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}}>
+            <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:20}}>
+              <button onClick={()=>setView('books')} className="btn btn-outline btn-sm" style={{padding:'7px 12px'}}>← {t('back')}</button>
+              <div>
+                <h2 style={{fontFamily:'var(--font-serif)',fontSize:22,fontWeight:500}}>{book.name}</h2>
+                <div style={{fontSize:12,color:'var(--text-muted)'}}>{book.chapters} {t('chapters')} · {book.testament==='OT'?t('oldTestament'):t('newTestament')} · {tran}</div>
+              </div>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(52px,1fr))',gap:8}}>
+              {Array.from({length:book.chapters},(_,i)=>i+1).map(n=>(
+                <motion.button key={n} whileHover={{scale:1.07}} whileTap={{scale:0.94}} onClick={()=>{setCh(n);setView('reading')}}
+                  style={{padding:'12px 6px',borderRadius:10,fontWeight:500,fontSize:14,background:n===ch?'var(--ink-900)':'var(--bg-card)',color:n===ch?'var(--text-inverse)':'var(--text-primary)',border:`1px solid ${n===ch?'transparent':'var(--border-subtle)'}`,cursor:'pointer',transition:'all var(--dur-fast) ease'}}>
+                  {n}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {view==='reading'&&book&&(
+          <motion.div key="reading" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+              <button onClick={()=>setView('chapters')} className="btn btn-outline btn-sm" style={{padding:'7px 12px'}}>← {t('chapters')}</button>
+              <div style={{flex:1}}>
+                <h2 style={{fontFamily:'var(--font-serif)',fontSize:22,fontWeight:500,lineHeight:1.1}}>{book.name}</h2>
+                <div style={{fontSize:12,color:'var(--text-muted)'}}>{t('chapter')} {ch}</div>
+              </div>
+              <select className="select-field" style={{width:'auto',minWidth:80}} value={tran} onChange={e=>setTran(e.target.value)}>
+                {TRANSLATIONS.map(t=><option key={t.code} value={t.code}>{t.code}</option>)}
+              </select>
+            </div>
+
+            <div style={{lineHeight:1.95,marginBottom:24}}>
+              {verses.map(v=>(
+                <span key={v.v} style={{cursor:'pointer'}} onClick={()=>openAction(v)}>
+                  <sup style={{fontSize:10,fontWeight:600,color:'var(--gold-600)',marginRight:3,verticalAlign:'super'}}>{v.v}</sup>
+                  <span style={{fontFamily:'var(--font-serif)',fontSize:'clamp(16px,2vw,18px)',color:selected?.v===v.v?'var(--ink-900)':'var(--ink-700)',background:selected?.v===v.v?'rgba(212,168,75,0.18)':'transparent',borderRadius:3,padding:'1px 2px',transition:'all var(--dur-fast) ease',lineHeight:1.9}}>
+                    {v.text}{' '}
+                  </span>
+                </span>
+              ))}
+            </div>
+
+            {/* Chapter nav */}
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',paddingTop:20,borderTop:'1px solid var(--border-subtle)'}}>
+              <button onClick={()=>{if(ch>1){setCh(c=>c-1)}}} disabled={ch<=1} className="btn btn-outline" style={{gap:6,opacity:ch<=1?0.35:1}}>{t('previous')}</button>
+              <span style={{fontSize:13,color:'var(--text-muted)'}}>{ch}/{book.chapters}</span>
+              <button onClick={()=>{if(ch<book.chapters){setCh(c=>c+1)}}} disabled={ch>=book.chapters} className="btn btn-outline" style={{gap:6,opacity:ch>=book.chapters?0.35:1}}>{t('next')}</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Verse action bottom sheet */}
+      <AnimatePresence>
+        {actionSheet&&selected&&(
+          <>
+            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={closeAction}
+              style={{position:'fixed',inset:0,background:'rgba(28,23,16,0.5)',backdropFilter:'blur(4px)',zIndex:200}}/>
+            <motion.div initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',damping:28,stiffness:300}}
+              style={{position:'fixed',bottom:0,left:0,right:0,background:'var(--bg-card)',borderRadius:'24px 24px 0 0',padding:'20px 20px calc(env(safe-area-inset-bottom,0px)+20px)',zIndex:300,maxHeight:'85vh',overflowY:'auto'}}>
+              <div style={{width:36,height:4,background:'var(--ink-200)',borderRadius:2,margin:'0 auto 20px'}}/>
+              <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:12,padding:14,marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:500,color:'var(--gold-700)',marginBottom:6}}>{book?.name} {ch}:{selected.v} · {tran}</div>
+                <p style={{fontFamily:'var(--font-serif)',fontSize:15,fontStyle:'italic',color:'var(--ink-800)',lineHeight:1.7}}>{selected.text}</p>
+              </div>
+              {/* Primary actions */}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:16}}>
+                {[
+                  ['save','🔖', t('save')],
+                  ['copy','📋', t('copy')],
+                  ['share','💬', t('whatsapp')],
+                  ['addSermon','🎙', t('verseActions.addSermon')],
+                  ['addPrayer','🙏', t('verseActions.addPrayer')],
+                  ['addStudy','📚', t('verseActions.addStudy')],
+                  ['note','📝', t('verseActions.addNote')]
+                ].map(([type,e,label])=>(
+                  <button key={type} onClick={()=>doAction(type)}
+                    style={{display:'flex',flexDirection:'column',alignItems:'center',gap:5,padding:'12px 8px',borderRadius:12,background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',cursor:'pointer',transition:'all var(--dur-fast) ease'}}>
+                    <span style={{fontSize:22}}>{e}</span>
+                    <span style={{fontSize:11,fontWeight:500,color:'var(--text-secondary)',textAlign:'center',lineHeight:1.2}}>{label}</span>
+                  </button>
+                ))}
+              </div>
+              {/* AI actions */}
+              <div style={{fontSize:11,fontWeight:500,color:'var(--text-muted)',letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:10}}>{t('aiInsights')}</div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:aiResult?16:0}}>
+                {[
+                  ['explain', t('explain')],
+                  ['preach', t('preachingAngle')],
+                  ['counsel', t('counselling')],
+                  ['youth', t('youthFriendly')]
+                ].map(([type,label])=>(
+                  <button key={type} onClick={()=>doAI(type)} disabled={loading}
+                    className={`btn btn-sm ${aiType===type?'btn-gold':'btn-outline'}`}>{label}</button>
+                ))}
+              </div>
+              {loading&&aiType&&<div style={{padding:'12px 0'}}><div className="loading-dots"><div className="loading-dot"/><div className="loading-dot"/><div className="loading-dot"/></div></div>}
+              {aiResult&&!loading&&(
+                <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:12,padding:16,marginTop:8}}>
+                  <div style={{fontSize:11,fontWeight:500,color:'var(--gold-700)',marginBottom:8}}>
+                    {aiType==='explain'?t('explanation'):aiType==='preach'?t('preachingAngles'):aiType==='counsel'?t('counsellingAngle'):t('youthFriendlyLabel')}
+                  </div>
+                  <p style={{fontSize:14,color:'var(--ink-700)',lineHeight:1.75,whiteSpace:'pre-wrap'}}>{aiResult}</p>
+                  <button onClick={()=>{navigator.clipboard.writeText(aiResult).catch(()=>{});showToast(t('copied'),'📋')}} style={{fontSize:12,color:'var(--gold-700)',background:'none',border:'none',cursor:'pointer',marginTop:8}}>📋 {t('copy')}</button>
+                </motion.div>
+              )}
+              <button onClick={closeAction} className="btn btn-outline" style={{width:'100%',justifyContent:'center',marginTop:16}}>{t('close')}</button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
