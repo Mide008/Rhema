@@ -159,6 +159,7 @@ export const translations = {
     prayerPointsLabel: '🙏 Prayer Points',
     preachingNotesLabel: '📝 Preaching Notes',
     illustrationsLabel: 'Illustrations',
+    sermonSaved: 'Sermon saved', // <-- added missing key
 
     // ===== SUNDAY PACK =====
     sundayPackTitle: 'Sunday Pack Generator',
@@ -313,6 +314,7 @@ export const translations = {
     readChapter: 'Read chapter',
     searchHome: 'What are you facing today? Topic, feeling, or situation…',
     find: 'Find →',
+    noQuery: 'Please enter a search term', // <-- added missing key
 
     // ===== BIBLE READER =====
     searchBooks: 'Search books…',

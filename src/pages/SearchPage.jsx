@@ -25,7 +25,7 @@ export default function SearchPage() {
   const handleSearch = async (e) => {
     e?.preventDefault()
     if (!query.trim()) {
-      showToast('Please enter a search term', '⚠️')
+      showToast(t('noQuery') || 'Please enter a search term', '⚠️')
       return
     }
 
@@ -75,7 +75,7 @@ export default function SearchPage() {
         <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10 }}>
           <input
             className="input-search"
-            placeholder="Search the Bible by topic, feeling, or situation..."
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{ flex: 1 }}
@@ -104,7 +104,7 @@ export default function SearchPage() {
         <EmptyState
           icon="📖"
           headline={t('noVersesFound')}
-          body={`We couldn't find verses for "${query}". Try different words or a mood.`}
+          body={`${t('tryDifferentWords')}`}
           ctaLabel="Try again"
           onCta={() => { setQuery(''); setHasSearched(false); }}
         />

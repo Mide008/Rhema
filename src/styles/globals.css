@@ -240,3 +240,16 @@ input,textarea,select{font-family:var(--font-sans);font-size:15px;color:var(--te
 span, button, .emoji {
   font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
 }
+
+.icon-3d {
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)) drop-shadow(0 0 12px rgba(212,168,75,0.3));
+  transform: perspective(400px) rotateY(2deg) rotateX(2deg);
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+.icon-3d:hover {
+  transform: perspective(400px) rotateY(-4deg) rotateX(4deg) scale(1.05);
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3)) drop-shadow(0 0 24px rgba(212,168,75,0.5));
+}
+.icon-glow {
+  filter: drop-shadow(0 0 12px rgba(212,168,75,0.4));
+}

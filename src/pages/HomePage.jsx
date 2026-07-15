@@ -97,14 +97,16 @@ export default function HomePage() {
       {/* Quick actions — 2x2 grid */}
       <RevealCard delay={0.12}>
         <h2 style={{fontFamily:'var(--font-serif)',fontSize:22,fontWeight:500,marginBottom:16,color:'var(--text-primary)'}}>
-          {t('whereWouldYouGo') || 'Where would you like to go?'}
+          {t('whereWouldYouGo')}
         </h2>
         <div className="grid-2" style={{gap:14}}>
           {[
-            {id:'inspire',emoji:'✨',label:t('getInspired'),desc:t('getInspiredDesc') || 'Scripture for your moment',bg:'linear-gradient(135deg,#FDF6E8,#F5E6C8)'},
-            {id:'sermon', emoji:'🎙',label:t('sermonBuilder'),desc:t('sermonBuilderDesc') || 'Full outline in 30 seconds',bg:'linear-gradient(135deg,#F5EDE8,#EDD5C8)'},
-            {id:'bible',  emoji:'📖',label:t('bibleReader'),desc:t('bibleReaderDesc') || '66 books · 15 translations',bg:'linear-gradient(135deg,#EBF0EB,#D8E8D6)'},
-            {id:'prayer', emoji:'🙏',label:t('prayerJournal'),desc:t('prayerJournalDesc') || 'Log, track & celebrate',bg:'linear-gradient(135deg,#EDE8F0,#D8D0E8)'},
+            {id:'inspire',emoji:'✨',label:t('getInspired'),desc:t('getInspiredDesc'),bg:'linear-gradient(135deg,#FDF6E8,#F5E6C8)'},
+            {id:'warfare',emoji:'⚔️',label:t('navWarfare'),desc:'Prayer points, scripture & strategy',bg:'linear-gradient(135deg,#F3E8E8,#E8D0D0)'},
+            {id:'devotional',emoji:'☀️',label:t('navDevotional'),desc:"Today's verse, reflection & prayer",bg:'linear-gradient(135deg,#F5F0E0,#EBDFC0)'},
+            {id:'sermon', emoji:'🎙',label:t('sermonBuilder'),desc:t('sermonBuilderDesc'),bg:'linear-gradient(135deg,#F5EDE8,#EDD5C8)'},
+            {id:'bible',  emoji:'📖',label:t('bibleReader'),desc:t('bibleReaderDesc'),bg:'linear-gradient(135deg,#EBF0EB,#D8E8D6)'},
+            {id:'prayer', emoji:'🙏',label:t('prayerJournal'),desc:t('prayerJournalDesc'),bg:'linear-gradient(135deg,#EDE8F0,#D8D0E8)'},
           ].map((a,i)=>(
             <motion.button key={a.id} onClick={()=>setActivePage(a.id)}
               whileHover={{y:-4,boxShadow:'0 16px 40px rgba(28,23,16,0.12)'}} whileTap={{scale:0.97}}
@@ -124,7 +126,7 @@ export default function HomePage() {
       {/* Mood selector */}
       <RevealCard delay={0.14}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-          <h2 style={{fontFamily:'var(--font-serif)',fontSize:22,fontWeight:500}}>{t('howAreYouFeeling') || 'How are you feeling?'}</h2>
+          <h2 style={{fontFamily:'var(--font-serif)',fontSize:22,fontWeight:500}}>{t('howAreYouFeeling')}</h2>
           <button onClick={()=>setActivePage('inspire')} style={{fontSize:13,color:'var(--gold-700)',fontWeight:500,background:'none',border:'none',cursor:'pointer'}}>{t('getAWord')}</button>
         </div>
         <div className="mood-grid">
@@ -179,7 +181,7 @@ export default function HomePage() {
           <div style={{flex:1,minWidth:200}}>
             <div style={{fontSize:10,letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--gold-700)',marginBottom:10}}>✦ {t('poweredBy')}</div>
             <MotionHeadline text={t('fourAIEngines')} as="h2" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(20px,2.5vw,28px)',fontWeight:500,color:'var(--text-primary)',lineHeight:1.25,marginBottom:12}}/>
-            <p style={{fontSize:13,color:'var(--text-muted)',lineHeight:1.7,marginBottom:16}}>{t('fourAIEnginesDesc') || 'Claude, Gemini, Groq and OpenRouter work in sequence — so you always get an answer.'}</p>
+            <p style={{fontSize:13,color:'var(--text-muted)',lineHeight:1.7,marginBottom:16}}>{t('fourAIEnginesDesc')}</p>
             <button onClick={()=>setActivePage('settings')} className="btn btn-outline btn-sm" style={{gap:6}}>⚙️ {t('configureAIKeys')}</button>
           </div>
           <OrbitalRing size={220} radius={88} duration={20}/>

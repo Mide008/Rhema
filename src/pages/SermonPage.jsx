@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
 import { useAIServices } from '@/lib/aiServices'
@@ -28,7 +28,20 @@ export default function SermonPage() {
   const [timerOn, setTimerOn] = useState(false)
   const { ask, loading } = useAI()
   const ai = useAIServices(ask)
-  const { sermons, saveSermon, deleteSermon, showToast, setActivePage } = useApp()
+  const { sermons, saveSermon, deleteSermon, showToast, setActivePage, pendingVerse, setPendingVerse } = useApp()
+
+  useEffect(() => {
+    if (!pendingVerse) return
+    setForm(f => ({ ...f, scripture: `${pendingVerse.ref} — ${pendingVerse.text}` }))
+    setPendingVerse(null)
+    showToast(`${pendingVerse.ref} added to Sermon Studio`, '📎')
+  }, [pendingVerse])
+
+  useEffect(() => {
+    if (!timerOn) return
+    const id = setInterval(() => setElapsed(e => e + 1), 1000)
+    return () => clearInterval(id)
+  }, [timerOn])
 
   const upd = (k,v) => setForm(f=>({...f,[k]:v}))
 
@@ -203,6 +216,14 @@ export default function SermonPage() {
                   </div>
                 ))}
 
+                {sermon.illustrations?.length>0&&(
+                  <SectionBox title={t('illustrationsLabel')||'Illustrations'}>
+                    {sermon.illustrations.map((il,i)=>(
+                      <div key={i} style={{padding:'8px 0',borderBottom:i<sermon.illustrations.length-1?'1px solid var(--border-subtle)':'none',fontSize:14,color:'var(--ink-700)',lineHeight:1.65}}>💡 {il}</div>
+                    ))}
+                  </SectionBox>
+                )}
+
                 <EditableSection title={t('applicationLabel')} sectionKey="application" value={sermon.application||''} onChange={v=>setSermon(s=>({...s,application:v}))} onImprove={()=>improve('application',sermon.application||'')} improving={improving==='application'} showToast={showToast} t={t}/>
                 <EditableSection title={t('altarCallLabel')} sectionKey="altarCall" value={sermon.altarCall||''} onChange={v=>setSermon(s=>({...s,altarCall:v}))} onImprove={()=>improve('altarCall',sermon.altarCall||'')} improving={improving==='altarCall'} showToast={showToast} t={t} dark/>
                 <EditableSection title={t('closingPrayerLabel')} sectionKey="closingPrayer" value={sermon.closingPrayer||''} onChange={v=>setSermon(s=>({...s,closingPrayer:v}))} onImprove={()=>improve('closingPrayer',sermon.closingPrayer||'')} improving={improving==='closingPrayer'} showToast={showToast} t={t}/>
@@ -268,8 +289,8 @@ export default function SermonPage() {
                 <h1 style={{fontFamily:'var(--font-serif)',fontSize:28,fontWeight:500}}>{sermon.title}</h1>
                 <div style={{display:'flex',gap:10,alignItems:'center'}}>
                   <div style={{fontSize:24,fontWeight:600,fontVariantNumeric:'tabular-nums',color:'var(--gold-700)'}}>{`${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`}</div>
-                  <button onClick={()=>setTimerOn(t=>{if(!t)setInterval(()=>setElapsed(e=>e+1),1000);return!t})} className="btn btn-outline btn-sm">{timerOn?'⏸':'▶'}</button>
-                  <button onClick={()=>setPreachMode(false)} className="btn btn-outline btn-sm">✕ {t('preachModeExit')}</button>
+                  <button onClick={()=>setTimerOn(v=>!v)} className="btn btn-outline btn-sm">{timerOn?'⏸':'▶'}</button>
+                  <button onClick={()=>{setPreachMode(false);setTimerOn(false);setElapsed(0)}} className="btn btn-outline btn-sm">✕ {t('preachModeExit')}</button>
                 </div>
               </div>
               <div style={{fontSize:20,fontFamily:'var(--font-serif)',fontStyle:'italic',color:'var(--gold-700)',marginBottom:24}}>{sermon.mainText}</div>
@@ -294,7 +315,7 @@ export default function SermonPage() {
   )
 }
 
-// Helper components (unchanged except using t for labels)
+// Helper components
 function SectionBox({title,children,dark}){
   return(
     <div style={{background:dark?'var(--ink-900)':'var(--bg-card)',border:'1px solid var(--border-subtle)',borderRadius:16,padding:20}}>

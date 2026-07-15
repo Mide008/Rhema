@@ -150,12 +150,13 @@ export default function SavedPage(){
                       </div>
                       {/* Pull-into + AI actions */}
                       <div style={{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}}>
-                        <button onClick={()=>pullInto('sermon',v)} className="btn btn-sm" style={{background:'var(--terra-100)',color:'var(--terra-600)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo')('Sermon')}</button>
-                        <button onClick={()=>pullInto('prayer',v)} className="btn btn-sm" style={{background:'var(--sage-100)',color:'var(--sage-600)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo')('Prayer')}</button>
-                        <button onClick={()=>pullInto('study',v)} className="btn btn-sm" style={{background:'var(--gold-100)',color:'var(--gold-800)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo')('Study')}</button>
-                        <button onClick={()=>pullInto('sunday',v)} className="btn btn-sm" style={{background:'var(--ink-100)',color:'var(--ink-600)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo')('Sunday')}</button>
+                        <button onClick={()=>pullInto('sermon',v)} className="btn btn-sm" style={{background:'var(--terra-100)',color:'var(--terra-600)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo').replace('{target}','Sermon')}</button>
+                        <button onClick={()=>pullInto('prayer',v)} className="btn btn-sm" style={{background:'var(--sage-100)',color:'var(--sage-600)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo').replace('{target}','Prayer')}</button>
+                        <button onClick={()=>pullInto('study',v)} className="btn btn-sm" style={{background:'var(--gold-100)',color:'var(--gold-800)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo').replace('{target}','Study')}</button>
+                        <button onClick={()=>pullInto('sunday',v)} className="btn btn-sm" style={{background:'var(--ink-100)',color:'var(--ink-600)',border:'none',fontSize:11,padding:'5px 10px'}}>{t('savedAddTo').replace('{target}','Sunday')}</button>
                         <button onClick={()=>aiAction('explain',v)} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('explain')}</button>
                         <button onClick={()=>aiAction('preach',v)} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('preachingAngle')}</button>
+                        <button onClick={()=>aiAction('counsel',v)} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('counsellingAngle')}</button>
                         <button onClick={()=>aiAction('youth',v)} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('youthFriendly')}</button>
                         <button onClick={()=>{const n=prompt(`Note for ${v.ref}:`);if(n)addVerseNote(v.ref,v.text,n,null,v.tags||[])}} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('savedNote')}</button>
                       </div>

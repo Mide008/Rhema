@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
 import { useAI } from '@/lib/useAI'
 import { useTranslation } from '@/hooks/useTranslation'
-import { BIBLE_BOOKS, POPULAR_BOOKS, TRANSLATIONS, SAMPLE_CHAPTERS } from '@/lib/bibleData'
+import { BIBLE_BOOKS, POPULAR_BOOKS, TRANSLATIONS } from '@/lib/bibleData'
+import { fetchChapter } from '@/services/bibleApi'
 import { VERSE_PROMPTS } from '@/lib/aiServices'
 import { RevealCard } from '@/components/ui/MotionComponents'
 
@@ -22,6 +23,22 @@ export default function BiblePage(){
   const [aiResult,setAiResult]=useState(null)
   const [aiType,setAiType]=useState('')
   const [commentary,setCommentary]=useState(null)
+  const [verses,setVerses]=useState([])
+  const [chapterLoading,setChapterLoading]=useState(false)
+  const [chapterNote,setChapterNote]=useState(null)
+
+  useEffect(()=>{
+    if(view!=='reading'||!book)return
+    let cancelled=false
+    setChapterLoading(true);setChapterNote(null);setVerses([])
+    fetchChapter(book.name,ch,tran).then(res=>{
+      if(cancelled)return
+      setVerses(res.verses||[])
+      setChapterNote(res.note||null)
+      setChapterLoading(false)
+    })
+    return ()=>{cancelled=true}
+  },[view,book,ch,tran])
 
   const filtered=BIBLE_BOOKS.filter(b=>{
     const tm=testament==='All'||b.testament===testament
@@ -29,8 +46,6 @@ export default function BiblePage(){
     return tm&&sm
   })
   const popular=BIBLE_BOOKS.filter(b=>POPULAR_BOOKS.includes(b.name))
-  const chKey=book?`${book.name==='Psalms'?'Psalm':book.name} ${ch}`:null
-  const verses=chKey&&SAMPLE_CHAPTERS[chKey]?SAMPLE_CHAPTERS[chKey]:book?Array.from({length:15},(_,i)=>({v:i+1,text:`[${book.name} ${ch}:${i+1} — ${tran}] In production, this loads from the api.bible API with your selected translation.`})):[]
 
   const openAction=(v)=>{setSelected(v);setActionSheet(true);setAiResult(null);setAiType('')}
   const closeAction=()=>{setSelected(null);setActionSheet(false);setAiResult(null)}
@@ -56,6 +71,7 @@ export default function BiblePage(){
     else if(type==='addSermon'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('sermon');showToast(t('verseReadySermon') || 'Verse ready for sermon','🎙')}
     else if(type==='addPrayer'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('prayer');showToast(t('verseReadyPrayer') || 'Verse ready for prayer','🙏')}
     else if(type==='addStudy'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('study');showToast(t('verseReadyStudy') || 'Verse ready for study guide','📚')}
+    else if(type==='addSunday'){setPendingVerse({ref,translation:tran,text:selected.text});setActivePage('sunday');showToast(t('verseReadySunday') || 'Verse ready for Sunday Pack','📋')}
     else if(type==='note'){const n=prompt(`Note for ${ref}:`);if(n)addVerseNote(ref,selected.text,n,null)}
     closeAction()
   }
@@ -74,18 +90,16 @@ export default function BiblePage(){
                 {TRANSLATIONS.map(t=><option key={t.code} value={t.code}>{t.code}</option>)}
               </select>
             </div>
-            {/* Translation info */}
             <div style={{padding:'10px 14px',background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,fontSize:12,color:'var(--gold-800)'}}>
               <strong>{TRANSLATIONS.find(t=>t.code===tran)?.name}</strong> — {TRANSLATIONS.find(t=>t.code===tran)?.notes}
             </div>
-            {/* All translations picker */}
             <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
               {TRANSLATIONS.map(t=><button key={t.code} title={t.name} onClick={()=>setTran(t.code)} className={`tag ${tran===t.code?'tag-dark':'tag-ink'}`} style={{cursor:'pointer',padding:'5px 10px',fontSize:11,fontWeight:tran===t.code?600:400}}>{t.code}</button>)}
             </div>
             <div style={{display:'flex',gap:8}}>
-              {['All','OT','NT'].map(t=>{
-                const label = t==='OT' ? t('oldTestament') : t==='NT' ? t('newTestament') : t('allBooks')
-                return <button key={t} onClick={()=>setTestament(t)} className={`btn btn-sm ${testament===t?'btn-primary':'btn-outline'}`}>{label}</button>
+              {['All','OT','NT'].map(tst=>{
+                const label = tst==='OT' ? t('oldTestament') : tst==='NT' ? t('newTestament') : t('allBooks')
+                return <button key={tst} onClick={()=>setTestament(tst)} className={`btn btn-sm ${testament===tst?'btn-primary':'btn-outline'}`}>{label}</button>
               })}
             </div>
             {!bSearch&&testament==='All'&&(
@@ -146,7 +160,18 @@ export default function BiblePage(){
             </div>
 
             <div style={{lineHeight:1.95,marginBottom:24}}>
-              {verses.map(v=>(
+              {chapterNote&&(
+                <div style={{padding:'10px 14px',background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,fontSize:12,color:'var(--gold-800)',marginBottom:16,lineHeight:1.6}}>
+                  ⓘ {chapterNote}
+                </div>
+              )}
+              {chapterLoading&&(
+                <div style={{textAlign:'center',padding:40}}>
+                  <div className="loading-dots"><div className="loading-dot"/><div className="loading-dot"/><div className="loading-dot"/></div>
+                  <p style={{fontSize:13,color:'var(--text-muted)',marginTop:12}}>Loading {book.name} {ch}…</p>
+                </div>
+              )}
+              {!chapterLoading&&verses.map(v=>(
                 <span key={v.v} style={{cursor:'pointer'}} onClick={()=>openAction(v)}>
                   <sup style={{fontSize:10,fontWeight:600,color:'var(--gold-600)',marginRight:3,verticalAlign:'super'}}>{v.v}</sup>
                   <span style={{fontFamily:'var(--font-serif)',fontSize:'clamp(16px,2vw,18px)',color:selected?.v===v.v?'var(--ink-900)':'var(--ink-700)',background:selected?.v===v.v?'rgba(212,168,75,0.18)':'transparent',borderRadius:3,padding:'1px 2px',transition:'all var(--dur-fast) ease',lineHeight:1.9}}>
@@ -156,7 +181,6 @@ export default function BiblePage(){
               ))}
             </div>
 
-            {/* Chapter nav */}
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',paddingTop:20,borderTop:'1px solid var(--border-subtle)'}}>
               <button onClick={()=>{if(ch>1){setCh(c=>c-1)}}} disabled={ch<=1} className="btn btn-outline" style={{gap:6,opacity:ch<=1?0.35:1}}>{t('previous')}</button>
               <span style={{fontSize:13,color:'var(--text-muted)'}}>{ch}/{book.chapters}</span>
@@ -182,13 +206,14 @@ export default function BiblePage(){
               {/* Primary actions */}
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:16}}>
                 {[
-                  ['save','🔖', t('save')],
-                  ['copy','📋', t('copy')],
-                  ['share','💬', t('whatsapp')],
-                  ['addSermon','🎙', t('verseActions.addSermon')],
-                  ['addPrayer','🙏', t('verseActions.addPrayer')],
-                  ['addStudy','📚', t('verseActions.addStudy')],
-                  ['note','📝', t('verseActions.addNote')]
+                  ['save','🔖', t('verseActionSave')],
+                  ['copy','📋', t('verseActionCopy')],
+                  ['share','💬', t('verseActionWhatsapp')],
+                  ['addSermon','🎙', t('verseActionAddSermon')],
+                  ['addPrayer','🙏', t('verseActionAddPrayer')],
+                  ['addStudy','📚', t('verseActionAddStudy')],
+                  ['addSunday','📋', t('verseActionAddSunday')],
+                  ['note','📝', t('verseActionAddNote')]
                 ].map(([type,e,label])=>(
                   <button key={type} onClick={()=>doAction(type)}
                     style={{display:'flex',flexDirection:'column',alignItems:'center',gap:5,padding:'12px 8px',borderRadius:12,background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',cursor:'pointer',transition:'all var(--dur-fast) ease'}}>
