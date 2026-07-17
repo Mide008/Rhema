@@ -26,7 +26,7 @@ export default function SpiritualWarfarePage(){
   const services = useAIServices(ask)
   const [situation, setSituation] = useState('')
   const [tran, setTran] = useState(user.translation || 'KJV')
-  const [lang, setLang] = useState('en')
+  const [lang, setLang] = useState(user.language||'en')
   const [result, setResult] = useState(null)
   const [view, setView] = useState('build')
 
@@ -37,7 +37,7 @@ export default function SpiritualWarfarePage(){
     setResult(null)
     const r = await services.generateWarfare({ situation: situation.trim(), translation: tran, languageLabel: langLabel })
     if (r) { setResult(r); showToast('Battle plan ready', '⚔️') }
-    else showToast('Could not generate — check your AI keys in Settings', '❌')
+    else showToast('Could not generate right now — please try again in a moment', '❌')
   }
 
   const quickPick = (label) => { setSituation(`I'm dealing with ${label.toLowerCase()}.`) }

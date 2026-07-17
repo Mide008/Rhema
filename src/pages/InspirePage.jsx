@@ -1,26 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
 import { useAI } from '@/lib/useAI'
+import { languageLabelFor } from '@/lib/aiServices'
 import { useTranslation } from '@/hooks/useTranslation'
 import { MOODS } from '@/lib/bibleData'
 import { RevealCard } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
 
 export default function InspirePage() {
-  const { showToast, setActivePage } = useApp()
-  const { ask, loading } = useAI()
+  const { showToast, setActivePage, user } = useApp()
+  const { ask, loading, error } = useAI()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [selectedMood, setSelectedMood] = useState(null)
   const [results, setResults] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
+  const resultsRef = useRef(null)
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e, override) => {
     e?.preventDefault()
-    const searchTerm = query.trim() || selectedMood?.label || ''
+    const searchTerm = (override ?? query).trim() || selectedMood?.label || ''
     if (!searchTerm) {
-      showToast('Please enter a topic or select a mood', '⚠️')
+      showToast(t('noQuery') || 'Please enter a topic or select a mood', '⚠️')
       return
     }
 
@@ -40,7 +42,7 @@ export default function InspirePage() {
           ],
           "pastoral_note": "A warm, encouraging message (2-3 sentences)."
         }
-        Do not include any markdown or extra text. Return ONLY the JSON.
+        ${languageLabelFor(user.language)!=='English' ? `Respond fully in ${languageLabelFor(user.language)}.\n        ` : ''}Do not include any markdown or extra text. Return ONLY the JSON.
       `
       const response = await ask(prompt)
       if (response) {
@@ -56,18 +58,35 @@ export default function InspirePage() {
           showToast(t('noVersesFound'), '📖')
         } else {
           showToast(`${parsed.verses.length} ${t('versesFound')}`, '✨')
+          setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
         }
+      } else {
+        // ask() returned null — all AI engines failed. Surface the real reason
+        // instead of doing nothing (this was the root cause of "search does nothing").
+        showToast(error || t('aiRequestFailed'), '❌')
       }
-    } catch (error) {
-      console.error('Search error:', error)
+    } catch (err) {
+      console.error('Search error:', err)
       showToast(t('aiRequestFailed'), '❌')
     }
   }
 
+  // Quick-chip handoff from Home (mood/topic tap) — prefill and run immediately
+  // instead of landing on an empty page.
+  useEffect(() => {
+    const pending = sessionStorage.getItem('rhema_search_query')
+    if (pending) {
+      sessionStorage.removeItem('rhema_search_query')
+      setQuery(pending)
+      handleSearch(null, pending)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleMoodClick = (mood) => {
     setSelectedMood(mood)
     setQuery(mood.label)
-    setTimeout(() => handleSearch(), 100)
+    handleSearch(null, mood.label)
   }
 
   return (
@@ -158,7 +177,7 @@ export default function InspirePage() {
       )}
 
       {!loading && results.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div ref={resultsRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {results.map((verse, idx) => (
             <motion.div
               key={idx}

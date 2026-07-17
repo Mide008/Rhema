@@ -36,7 +36,7 @@ Style: ${p.denomination}
 Length: ${p.length}
 Tone: ${p.tone}
 Translation: ${p.translation || 'KJV'}
-IMPORTANT: Never invent verse text. Use real references only. Return ONLY the JSON object.`,
+IMPORTANT: Never invent verse text. Use real references only.${p.languageLabel && p.languageLabel!=='English' ? `\nRespond fully in ${p.languageLabel} (translate all narrative text; keep scripture references in their normal form).` : ''} Return ONLY the JSON object.`,
 
   improveSection: (section, content, ctx) => `Improve this sermon section for a ${ctx.audience} in ${ctx.tone} tone.
 Section: ${section}
@@ -79,7 +79,7 @@ Scripture: ${p.scripture}
 Church: ${p.church || 'Our Church'}
 Speaker: ${p.speaker || ''}
 Theme: ${p.theme || ''}
-Announcements: ${p.announcements || ''}
+Announcements: ${p.announcements || ''}${p.languageLabel && p.languageLabel!=='English' ? `\nRespond fully in ${p.languageLabel}.` : ''}
 Return ONLY the JSON object.`,
 }
 
@@ -102,7 +102,7 @@ Scripture: ${p.scripture}
 Church: ${p.church || ''}
 Platform focus: ${p.platform}
 Tone: ${p.tone}
-Content type: ${p.contentType}
+Content type: ${p.contentType}${p.languageLabel && p.languageLabel!=='English' ? `\nRespond fully in ${p.languageLabel}.` : ''}
 Return ONLY the JSON object.`,
 }
 
@@ -129,7 +129,7 @@ Group type: ${p.groupType}
 Session length: ${p.length}
 Tone: ${p.tone}
 Questions: ${p.numQuestions || 6}
-Translation: ${p.translation || 'KJV'}
+Translation: ${p.translation || 'KJV'}${p.languageLabel && p.languageLabel!=='English' ? `\nRespond fully in ${p.languageLabel}.` : ''}
 Return ONLY the JSON object.`,
 }
 
@@ -165,6 +165,13 @@ export const RESPONSE_LANGUAGES = [
   { code: 'fr', label: 'French' },
   { code: 'es', label: 'Spanish' },
 ]
+
+// Resolves the app's UI language setting to a label the AI prompts understand,
+// so switching language in Settings changes what every page generates too —
+// not just the nav and static labels.
+export function languageLabelFor(code) {
+  return RESPONSE_LANGUAGES.find(l => l.code === code)?.label || 'English'
+}
 
 export const WARFARE_PROMPTS = {
   generate: (p) => `You are a spiritual warfare intercessor and pastoral counsellor. Someone has come to you with a real, often heavy situation. Respond with real biblical authority and warmth — never generic.

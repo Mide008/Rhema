@@ -1,1 +1,22 @@
-{"name":"Rhema AI","short_name":"Rhema AI","start_url":"/","display":"standalone","background_color":"#1C1710","theme_color":"#1C1710","icons":[{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml"}]}
+{
+  "name": "Rhema AI — The Living Word, Anytime",
+  "short_name": "Rhema AI",
+  "description": "AI-powered Bible reading, sermon builder, spiritual warfare engine, daily devotional, prayer journal and church tools.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1C1710",
+  "theme_color": "#1C1710",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "New Prayer", "short_name": "Prayer", "url": "/?page=prayer", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Today's Devotional", "short_name": "Devotional", "url": "/?page=devotional", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Spiritual Warfare", "short_name": "Warfare", "url": "/?page=warfare", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

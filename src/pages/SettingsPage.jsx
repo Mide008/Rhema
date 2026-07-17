@@ -1,20 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { TRANSLATIONS } from '@/lib/bibleData'
 import { RevealCard } from '@/components/ui/MotionComponents'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
+import { idbGetAll, idbClear } from '@/lib/idb'
 
-const LANGS=[{code:'en',label:'English'},{code:'yo',label:'Yoruba'},{code:'ig',label:'Igbo'},{code:'pc',label:'Pidgin English'},{code:'fr',label:'French'},{code:'es',label:'Spanish'},{code:'pt',label:'Portuguese'}]
+const LANGS=[{code:'en',label:'English'},{code:'yo',label:'Yoruba'},{code:'ig',label:'Igbo'},{code:'pcm',label:'Nigerian Pidgin'},{code:'fr',label:'French'},{code:'es',label:'Spanish'}]
 const TYPES=[{id:'pastor',label:'Pastor / Minister'},{id:'believer',label:'Everyday believer'},{id:'group-leader',label:'Group / cell leader'},{id:'student',label:'Bible student'}]
 const DENS=['Pentecostal / Charismatic','Anglican / Episcopal','Baptist','Catholic','Non-denominational','Methodist','Reformed / Presbyterian','Adventist','Prefer not to say']
-const AI_KEYS=[
-  {key:'claude',label:'Claude (Anthropic)',env:'ANTHROPIC_API_KEY',url:'https://console.anthropic.com',noteKey:'primary'},
-  {key:'gemini',label:'Gemini (Google)',env:'GEMINI_API_KEY',url:'https://aistudio.google.com/app/apikey',noteKey:'backup'},
-  {key:'groq',label:'Groq (LLaMA 3)',env:'GROQ_API_KEY',url:'https://console.groq.com',noteKey:'ultraFast'},
-  {key:'openrouter',label:'OpenRouter',env:'OPENROUTER_API_KEY',url:'https://openrouter.ai/keys',noteKey:'freeModels'},
-]
 
 function Toggle({checked,onChange}){
   return(
@@ -31,30 +26,70 @@ export default function SettingsPage(){
   const [open,setOpen]=useState(null)
   const [notifs,setNotifs]=useState({daily:true,sermon:false,prayer:false})
   const [deleteConfirm,setDeleteConfirm]=useState(false)
-  const [aiStatus,setAiStatus]=useState(null)
-  const [aiStatusError,setAiStatusError]=useState(false)
+  const [fontScale,setFontScale]=useState(()=>parseFloat(localStorage.getItem('rhema_font_scale')||'1'))
+  const fileRef=useRef(null)
   const upd=(f,v)=>setUser(u=>({...u,[f]:v}))
 
   useEffect(()=>{
-    fetch('/api/ai-status')
-      .then(r=>r.ok ? r.json() : Promise.reject())
-      .then(setAiStatus)
-      .catch(()=>setAiStatusError(true))
-  },[])
+    document.documentElement.style.setProperty('--font-scale', fontScale)
+    localStorage.setItem('rhema_font_scale', String(fontScale))
+  },[fontScale])
 
   const handleLanguageChange = (code) => {
     upd('language', code)
     showToast(`Language: ${LANGS.find(l=>l.code===code)?.label}`, '🌐')
   }
 
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2*1024*1024) { showToast('Image must be under 2MB','⚠️'); return }
+    const reader = new FileReader()
+    reader.onload = () => { upd('photo', reader.result); showToast('Profile photo updated','✓') }
+    reader.readAsDataURL(file)
+  }
+
+  const handleExportData = async () => {
+    const localData = {}
+    for (let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i)
+      try { localData[k] = JSON.parse(localStorage.getItem(k)) } catch { localData[k] = localStorage.getItem(k) }
+    }
+    const offlineEntries = await idbGetAll()
+    const payload = { exportedAt: new Date().toISOString(), user, localStorage: localData, offlineEntries }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `rhema-ai-data-${Date.now()}.json`
+    document.body.appendChild(a); a.click(); a.remove()
+    URL.revokeObjectURL(url)
+    showToast('Your data was downloaded','📧')
+  }
+
+  const handleDeleteData = async () => {
+    localStorage.clear()
+    await idbClear()
+    showToast('All local data deleted','⚠️')
+    setTimeout(()=>window.location.reload(), 900)
+  }
+
   const SECTIONS=[
     {id:'profile',emoji:'👤',label:t('profile'),desc:user.name,content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
+        <div style={{display:'flex',alignItems:'center',gap:14}}>
+          <div onClick={()=>fileRef.current?.click()} style={{width:64,height:64,borderRadius:'50%',background:user.photo?`url(${user.photo}) center/cover`:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:700,color:'var(--ink-900)',flexShrink:0,cursor:'pointer',border:'2px solid var(--border-gold)'}}>
+            {!user.photo && (user.name||'R').slice(0,2).toUpperCase()}
+          </div>
+          <div>
+            <button className="btn btn-outline btn-sm" onClick={()=>fileRef.current?.click()}>📷 {t('changePhoto')||'Change photo'}</button>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhotoUpload} style={{display:'none'}}/>
+          </div>
+        </div>
         <div className="input-group"><label className="input-label">{t('yourName')}</label><input className="input-field" value={user.name||''} onChange={e=>upd('name',e.target.value)}/></div>
         <div className="input-group"><label className="input-label">{t('email')}</label><input className="input-field" value={user.email||''} type="email" onChange={e=>upd('email',e.target.value)}/></div>
         <div className="input-group">
           <label className="input-label">{t('iAm')}</label>
-          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{TYPES.map(t=><button key={t.id} onClick={()=>upd('type',t.id)} className={`tag ${user.type===t.id?'tag-dark':'tag-ink'}`} style={{cursor:'pointer',padding:'7px 14px',fontSize:12.5}}>{t.label}</button>)}</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{TYPES.map(ty=><button key={ty.id} onClick={()=>upd('type',ty.id)} className={`tag ${user.type===ty.id?'tag-dark':'tag-ink'}`} style={{cursor:'pointer',padding:'7px 14px',fontSize:12.5}}>{ty.label}</button>)}</div>
         </div>
         <div className="input-group"><label className="input-label">{t('denomination')}</label><select className="select-field" value={user.denomination||''} onChange={e=>upd('denomination',e.target.value)}>{DENS.map(d=><option key={d}>{d}</option>)}</select></div>
         <div className="input-group"><label className="input-label">{t('churchName')}</label><input className="input-field" placeholder="Your church" value={user.church||''} onChange={e=>upd('church',e.target.value)}/></div>
@@ -74,16 +109,26 @@ export default function SettingsPage(){
         }
       </div>
     )},
+    {id:'appearance',emoji:'🔠',label:t('appearance')||'Appearance',desc:`${Math.round(fontScale*100)}% text size`,content:(
+      <div style={{display:'flex',flexDirection:'column',gap:14}}>
+        <div className="input-group">
+          <label className="input-label">{t('textSize')||'Text size'}</label>
+          <input type="range" min="0.85" max="1.4" step="0.05" value={fontScale} onChange={e=>setFontScale(parseFloat(e.target.value))} style={{width:'100%'}}/>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'var(--text-muted)'}}><span>A</span><span style={{fontSize:18}}>A</span></div>
+        </div>
+        <p style={{fontSize:{'--font-scale':fontScale}[0]?undefined:16*fontScale,color:'var(--text-primary)'}}>Preview: "The Lord is my shepherd, I shall not want."</p>
+      </div>
+    )},
     {id:'bible',emoji:'📖',label:t('biblePreferences'),desc:user.translation||'KJV',content:(
       <div style={{display:'flex',flexDirection:'column',gap:16}}>
         <div className="input-group">
           <label className="input-label">{t('defaultTranslation')}</label>
           <div style={{display:'flex',flexDirection:'column',gap:8}}>
-            {TRANSLATIONS.map(t=>(
-              <button key={t.code} onClick={()=>{upd('translation',t.code);showToast(`Default: ${t.name}`,'📖')}}
-                style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',borderRadius:10,cursor:'pointer',background:user.translation===t.code?'var(--gold-50)':'var(--bg-card)',border:`1.5px solid ${user.translation===t.code?'var(--gold-400)':'var(--border-subtle)'}`,transition:'all 0.15s'}}>
-                <div><span style={{fontSize:13,fontWeight:user.translation===t.code?600:400,marginRight:10}}>{t.code}</span><span style={{fontSize:12,color:'var(--text-muted)'}}>{t.name}</span></div>
-                <span style={{fontSize:11,color:'var(--ink-300)',maxWidth:140,textAlign:'right'}}>{t.notes}</span>
+            {TRANSLATIONS.map(tr=>(
+              <button key={tr.code} onClick={()=>{upd('translation',tr.code);showToast(`Default: ${tr.name}`,'📖')}}
+                style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',borderRadius:10,cursor:'pointer',background:user.translation===tr.code?'var(--gold-50)':'var(--bg-card)',border:`1.5px solid ${user.translation===tr.code?'var(--gold-400)':'var(--border-subtle)'}`,transition:'all 0.15s'}}>
+                <div><span style={{fontSize:13,fontWeight:user.translation===tr.code?600:400,marginRight:10}}>{tr.code}</span><span style={{fontSize:12,color:'var(--text-muted)'}}>{tr.name}</span></div>
+                <span style={{fontSize:11,color:'var(--ink-300)',maxWidth:140,textAlign:'right'}}>{tr.notes}</span>
               </button>
             ))}
           </div>
@@ -99,7 +144,14 @@ export default function SettingsPage(){
           </div>
         ))}
         {notifs.daily&&<div className="input-group"><label className="input-label">{t('dailyVerseTime')}</label><input type="time" className="input-field" value={user.notifTime||'07:00'} onChange={e=>upd('notifTime',e.target.value)}/></div>}
-        <button className="btn btn-gold" style={{alignSelf:'flex-start'}} onClick={()=>showToast(t('saveNotifications'),'🔔')}>{t('save')}</button>
+        <button className="btn btn-gold" style={{alignSelf:'flex-start'}} onClick={async()=>{
+          upd('notifs', notifs)
+          if ('Notification' in window) {
+            const perm = await Notification.requestPermission()
+            if (perm !== 'granted') { showToast('Enable notifications in your browser settings to receive reminders','🔕'); return }
+          }
+          showToast(t('saveNotifications'),'🔔')
+        }}>{t('save')}</button>
       </div>
     )},
     {id:'language',emoji:'🌐',label:t('language'),desc:LANGS.find(l=>l.code===user.language)?.label||'English',content:(
@@ -111,36 +163,13 @@ export default function SettingsPage(){
             {user.language===l.code&&<span style={{fontSize:12,color:'var(--gold-700)',fontWeight:600}}>✓ Selected</span>}
           </button>
         ))}
+        <p style={{fontSize:11,color:'var(--text-muted)'}}>Nav, actions and core screens are translated. Deeper AI-generated content (sermons, devotionals) is asked for in this language directly.</p>
       </div>
     )},
-    {id:'ai',emoji:'🤖',label:t('aiEngines'),desc:t('multiAI'),content:(
-      <div style={{display:'flex',flexDirection:'column',gap:14}}>
-        <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,padding:14,fontSize:13,color:'var(--gold-800)',lineHeight:1.65}}>
-          <strong>{t('aiFallback')}</strong> Keys are stored server-side only (Vercel project environment variables) and are never sent to this browser.
-        </div>
-        {aiStatusError && <div style={{fontSize:12,color:'var(--terra-600)'}}>Could not reach /api/ai-status — this is expected in local `vite dev` without `vercel dev`; it works once deployed.</div>}
-        {AI_KEYS.map(k=>{
-          const connected = aiStatus?.[k.key] === true
-          return (
-            <div key={k.label} style={{padding:'12px 14px',borderRadius:10,background:'var(--bg-card)',border:'1px solid var(--border-subtle)'}}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:4}}>
-                <span style={{fontSize:14,fontWeight:500,display:'flex',alignItems:'center',gap:8}}>
-                  {k.label}
-                  <span className={`tag ${connected?'tag-sage':'tag-terra'}`} style={{fontSize:9}}>{connected ? '● Connected' : '○ Not set'}</span>
-                </span>
-                <a href={k.url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:'var(--gold-700)',fontWeight:500}}>{t('getFreeKey')}</a>
-              </div>
-              <code style={{fontSize:11,color:'var(--text-muted)',background:'var(--bg-primary)',padding:'2px 6px',borderRadius:4}}>{k.env}</code>
-              <p style={{fontSize:12,color:'var(--ink-400)',marginTop:4}}>{t(k.noteKey)}</p>
-            </div>
-          )
-        })}
-      </div>
-    )},
-    {id:'privacy',emoji:'🔒',label:t('privacy'),desc:'GDPR compliant',content:(
+    {id:'privacy',emoji:'🔒',label:t('privacy'),desc:'Local-first storage',content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,padding:14,fontSize:13,color:'var(--gold-800)',lineHeight:1.65}}>{t('dataPrivacy')}</div>
-        <button onClick={()=>showToast('Export requested — check your email','📧')} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 0',background:'none',border:'none',cursor:'pointer',borderBottom:'1px solid var(--border-subtle)'}}>
+        <button onClick={handleExportData} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 0',background:'none',border:'none',cursor:'pointer',borderBottom:'1px solid var(--border-subtle)'}}>
           <span style={{fontSize:14}}>{t('downloadData')}</span><span style={{color:'var(--ink-200)'}}>→</span>
         </button>
         {!deleteConfirm
@@ -148,7 +177,7 @@ export default function SettingsPage(){
           :<div style={{background:'var(--terra-100)',border:'1px solid rgba(168,90,72,0.25)',borderRadius:12,padding:16}}>
             <p style={{fontSize:14,fontWeight:500,color:'var(--terra-600)',marginBottom:8}}>{t('deleteConfirm')}</p>
             <div style={{display:'flex',gap:10,marginTop:12}}>
-              <button onClick={()=>showToast('Deletion requested','⚠️')} className="btn btn-sm" style={{background:'var(--terra-500)',color:'white'}}>{t('yesDelete')}</button>
+              <button onClick={handleDeleteData} className="btn btn-sm" style={{background:'var(--terra-500)',color:'white'}}>{t('yesDelete')}</button>
               <button onClick={()=>setDeleteConfirm(false)} className="btn btn-outline btn-sm">{t('keepAccount')}</button>
             </div>
           </div>
@@ -175,13 +204,13 @@ export default function SettingsPage(){
     <div style={{display:'flex',flexDirection:'column',gap:12}}>
       <RevealCard>
         <div className="card-gold" style={{display:'flex',alignItems:'center',gap:16,marginBottom:4}}>
-          <div style={{width:56,height:56,borderRadius:'50%',background:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:700,color:'var(--ink-900)',flexShrink:0}}>
-            {(user.name||'R').slice(0,2).toUpperCase()}
+          <div style={{width:56,height:56,borderRadius:'50%',background:user.photo?`url(${user.photo}) center/cover`:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:700,color:'var(--ink-900)',flexShrink:0}}>
+            {!user.photo && (user.name||'R').slice(0,2).toUpperCase()}
           </div>
           <div>
             <div style={{fontFamily:'var(--font-serif)',fontSize:20,fontWeight:500}}>{user.name||'Welcome'}</div>
             <div style={{fontSize:13,color:'var(--text-muted)',textTransform:'capitalize',display:'flex',alignItems:'center',gap:8}}>
-              {TYPES.find(t=>t.id===user.type)?.label||user.type}
+              {TYPES.find(ty=>ty.id===user.type)?.label||user.type}
               <span className="tag tag-gold" style={{fontSize:10}}>{user.translation}</span>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
+import { languageLabelFor } from '@/lib/aiServices'
 import { useAIServices } from '@/lib/aiServices'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -28,7 +29,7 @@ export default function SermonPage() {
   const [timerOn, setTimerOn] = useState(false)
   const { ask, loading } = useAI()
   const ai = useAIServices(ask)
-  const { sermons, saveSermon, deleteSermon, showToast, setActivePage, pendingVerse, setPendingVerse } = useApp()
+  const { user, sermons, saveSermon, deleteSermon, showToast, setActivePage, pendingVerse, setPendingVerse } = useApp()
 
   useEffect(() => {
     if (!pendingVerse) return
@@ -48,7 +49,7 @@ export default function SermonPage() {
   const generate = async () => {
     if (!form.topic.trim()) { showToast(t('enterTopic'), '⚠️'); return }
     setSermon(null)
-    const r = await ai.generateSermon(form)
+    const r = await ai.generateSermon({ ...form, languageLabel: languageLabelFor(user.language) })
     if (r) { setSermon(r); setTab('edit'); showToast(t('sermonGenerated'), '🎙') }
     else showToast(t('errorParsing'), '❌')
   }

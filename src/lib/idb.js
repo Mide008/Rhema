@@ -48,3 +48,25 @@ export async function idbGet(key) {
     req.onerror = () => resolve(null)
   })
 }
+
+export async function idbGetAll() {
+  const db = await openDB()
+  if (!db) return []
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE, 'readonly')
+    const req = tx.objectStore(STORE).getAll()
+    req.onsuccess = () => resolve(req.result || [])
+    req.onerror = () => resolve([])
+  })
+}
+
+export async function idbClear() {
+  const db = await openDB()
+  if (!db) return false
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    tx.objectStore(STORE).clear()
+    tx.oncomplete = () => resolve(true)
+    tx.onerror = () => resolve(false)
+  })
+}

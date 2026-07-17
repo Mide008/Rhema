@@ -23,7 +23,22 @@ export function AppProvider({children}){
   const[devotionals,setDevotionals]=useState(s?.devotionals||[])
   const[confessions,setConfessions]=useState(s?.confessions||[])
   const[toasts,setToasts]=useState([])
-  const[activePage,setActivePage]=useState('home')
+  const[activePage,setActivePageRaw]=useState(()=>new URLSearchParams(window.location.search).get('page')||'home')
+  const setActivePage=useCallback((page)=>{
+    setActivePageRaw(page)
+    window.history.pushState({page},'',`?page=${page}`)
+  },[])
+  useEffect(()=>{
+    // Seed the initial history entry so the very first back-press has a real
+    // browser history state to resolve to, and wire real browser back/forward
+    // (and the mobile back-gesture, which fires the same popstate event) to
+    // in-app navigation instead of leaving the page or doing nothing.
+    window.history.replaceState({page:activePage},'',`?page=${activePage}`)
+    const onPopState=(e)=>setActivePageRaw(e.state?.page||'home')
+    window.addEventListener('popstate',onPopState)
+    return ()=>window.removeEventListener('popstate',onPopState)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
   const[sidebarOpen,setSidebarOpen]=useState(false)
   const[pendingVerse,setPendingVerse]=useState(null)
   const restoredFromIdb=useRef(false)

@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
-import { SUNDAY_PACK_PROMPTS } from '@/lib/aiServices'
+import { SUNDAY_PACK_PROMPTS, languageLabelFor } from '@/lib/aiServices'
 import { LoadingPulse } from '@/components/ui/Loading'
 import EmptyState from '@/components/ui/EmptyState'
 import { RevealCard, MagneticBtn, MotionHeadline } from '@/components/ui/MotionComponents'
@@ -22,13 +22,25 @@ export default function SundayPackPage(){
   const [theme,setTheme]=useState('')
   const [announcements,setAnnouncements]=useState('')
   const [pack,setPack]=useState(null)
-  const {ask,loading}=useAI()
+  const {ask,loading,error}=useAI()
+  const resultRef=useRef(null)
 
   const gen=async()=>{
-    if(!topic.trim())return
+    if(!topic.trim()){ showToast('Enter a sermon topic first', '⚠️'); return }
     setPack(null)
-    const raw=await ask(SUNDAY_PACK_PROMPTS.generate({topic,date,scripture,church:church||'Our Church',speaker,theme,announcements}))
-    if(raw){const j=parseJSON(raw);if(j)setPack(j)}
+    const raw=await ask(SUNDAY_PACK_PROMPTS.generate({topic,date,scripture,church:church||'Our Church',speaker,theme,announcements,languageLabel:languageLabelFor(user.language)}))
+    if(raw){
+      const j=parseJSON(raw)
+      if(j){
+        setPack(j)
+        showToast('Your Sunday Pack is ready','✓')
+        setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100)
+      } else {
+        showToast(t('errorParsing'),'❌')
+      }
+    } else {
+      showToast(error || t('aiRequestFailed'), '❌')
+    }
   }
 
   const shareAll=()=>{
@@ -117,7 +129,7 @@ export default function SundayPackPage(){
             <AnimatePresence>{loading&&<LoadingPulse message={t('preparingPack')}/>}</AnimatePresence>
             <AnimatePresence>
               {!loading&&pack&&(
-                <motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} style={{display:'flex',flexDirection:'column',gap:12}}>
+                <motion.div ref={resultRef} initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} style={{display:'flex',flexDirection:'column',gap:12}}>
                   <div className="ai-disclaimer" role="note"><span>✦</span><span>{t('aiDisclaimer')}</span></div>
                   {SECTIONS.map(({key,label,type})=>{
                     const content=pack[key]

@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { TRANSLATIONS } from '@/lib/bibleData'
-import { STUDY_GUIDE_PROMPTS } from '@/lib/aiServices'
+import { STUDY_GUIDE_PROMPTS, languageLabelFor } from '@/lib/aiServices'
 import { LoadingPulse } from '@/components/ui/Loading'
 import EmptyState from '@/components/ui/EmptyState'
 import { RevealCard, MagneticBtn, MotionHeadline } from '@/components/ui/MotionComponents'
@@ -32,14 +32,26 @@ export default function StudyPage() {
   const [tran, setTran] = useState(user.translation||'KJV')
   const [guide, setGuide] = useState(null)
   const [open, setOpen] = useState({})
-  const { ask, loading } = useAI()
+  const { ask, loading, error } = useAI()
+  const resultRef = useRef(null)
 
   const gen = async () => {
-    if (!topic.trim()) return
+    if (!topic.trim()) { showToast('Enter a study theme first', '⚠️'); return }
     setGuide(null)
-    const prompt = STUDY_GUIDE_PROMPTS.generate({ topic: topic+(passage?` (${passage})`:''), groupType, length, tone, numQuestions: numQ, translation: tran })
+    const prompt = STUDY_GUIDE_PROMPTS.generate({ topic: topic+(passage?` (${passage})`:''), groupType, length, tone, numQuestions: numQ, translation: tran, languageLabel: languageLabelFor(user.language) })
     const raw = await ask(prompt)
-    if (raw) { const j = parseJSON(raw); if (j) setGuide(j) }
+    if (raw) {
+      const j = parseJSON(raw)
+      if (j) {
+        setGuide(j)
+        showToast('Your study guide is ready','✓')
+        setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100)
+      } else {
+        showToast(t('errorParsing'),'❌')
+      }
+    } else {
+      showToast(error || t('aiRequestFailed'), '❌')
+    }
   }
 
   const share = () => {
@@ -137,7 +149,7 @@ export default function StudyPage() {
             <AnimatePresence>{loading&&<LoadingPulse message={t('buildingStudyGuide')}/>}</AnimatePresence>
             <AnimatePresence>
               {!loading&&guide&&(
-                <motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} style={{display:'flex',flexDirection:'column',gap:12}}>
+                <motion.div ref={resultRef} initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} style={{display:'flex',flexDirection:'column',gap:12}}>
                   <div className="ai-disclaimer" role="note"><span>✦</span><span>{t('aiDisclaimer')}</span></div>
                   <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:20,padding:24}}>
                     <div style={{fontSize:11,letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--gold-700)',marginBottom:8}}>{t('studyGuide')}</div>

@@ -197,7 +197,7 @@ export default function BiblePage(){
             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={closeAction}
               style={{position:'fixed',inset:0,background:'rgba(28,23,16,0.5)',backdropFilter:'blur(4px)',zIndex:200}}/>
             <motion.div initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',damping:28,stiffness:300}}
-              style={{position:'fixed',bottom:0,left:0,right:0,background:'var(--bg-card)',borderRadius:'24px 24px 0 0',padding:'20px 20px calc(env(safe-area-inset-bottom,0px)+20px)',zIndex:300,maxHeight:'85vh',overflowY:'auto'}}>
+              style={{position:'fixed',bottom:0,left:0,right:0,background:'var(--bg-card)',borderRadius:'24px 24px 0 0',padding:'20px 20px calc(env(safe-area-inset-bottom,0px) + 20px)',zIndex:300,maxHeight:'85vh',overflowY:'auto'}}>
               <div style={{width:36,height:4,background:'var(--ink-200)',borderRadius:2,margin:'0 auto 20px'}}/>
               <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:12,padding:14,marginBottom:16}}>
                 <div style={{fontSize:11,fontWeight:500,color:'var(--gold-700)',marginBottom:6}}>{book?.name} {ch}:{selected.v} · {tran}</div>

@@ -30,7 +30,7 @@ export default function DevotionalPage(){
   const { ask, loading } = useAI()
   const services = useAIServices(ask)
   const [tran, setTran] = useState(user.translation || 'KJV')
-  const [lang, setLang] = useState('en')
+  const [lang, setLang] = useState(user.language||'en')
   const [devotional, setDevotional] = useState(null)
   const [genLoading, setGenLoading] = useState(false)
   const [view, setView] = useState('today')
@@ -54,7 +54,7 @@ export default function DevotionalPage(){
         const entry = saveDevotional({ ...r, translation: tran, language: lang, date: today })
         setDevotional(entry)
         showToast('Devotional ready', '📖')
-      } else showToast('Could not generate — check your AI keys in Settings', '❌')
+      } else showToast('Could not generate right now — please try again in a moment', '❌')
     } finally { setGenLoading(false) }
   }
 

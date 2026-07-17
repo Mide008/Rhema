@@ -69,7 +69,7 @@ export default function HomePage() {
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:14}}>
           {TOPICS.slice(0,10).map(topic => (
             <motion.button key={topic} className="tag tag-gold" whileHover={{scale:1.05}} whileTap={{scale:0.96}}
-              onClick={()=>setActivePage('inspire')} style={{cursor:'pointer',fontSize:12,padding:'5px 13px'}}>{topic}</motion.button>
+              onClick={()=>{sessionStorage.setItem('rhema_search_query', topic); setActivePage('inspire')}} style={{cursor:'pointer',fontSize:12,padding:'5px 13px'}}>{topic}</motion.button>
           ))}
         </div>
       </RevealCard>
@@ -131,7 +131,7 @@ export default function HomePage() {
         </div>
         <div className="mood-grid">
           {MOODS.map(m=>(
-            <motion.button key={m.key} className="mood-chip" onClick={()=>setActivePage('inspire')} whileTap={{scale:0.92}} whileHover={{y:-3}}>
+            <motion.button key={m.key} className="mood-chip" onClick={()=>{sessionStorage.setItem('rhema_search_query', m.label); setActivePage('inspire')}} whileTap={{scale:0.92}} whileHover={{y:-3}}>
               <span className="mood-emoji">{m.emoji}</span>
               <span className="mood-label">{m.label}</span>
             </motion.button>
@@ -179,10 +179,10 @@ export default function HomePage() {
       <RevealCard delay={0.2}>
         <div style={{background:'linear-gradient(135deg,var(--gold-50),var(--bg-secondary))',borderRadius:24,padding:32,display:'flex',alignItems:'center',justifyContent:'space-around',flexWrap:'wrap',gap:24}}>
           <div style={{flex:1,minWidth:200}}>
-            <div style={{fontSize:10,letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--gold-700)',marginBottom:10}}>✦ {t('poweredBy')}</div>
-            <MotionHeadline text={t('fourAIEngines')} as="h2" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(20px,2.5vw,28px)',fontWeight:500,color:'var(--text-primary)',lineHeight:1.25,marginBottom:12}}/>
+            <div style={{fontSize:10,letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--gold-700)',marginBottom:10}}>✦ {t('yourWalk')||'Your walk'}</div>
+            <MotionHeadline text={t('everythingYouNeed')||'Everything you need, in one place'} as="h2" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(20px,2.5vw,28px)',fontWeight:500,color:'var(--text-primary)',lineHeight:1.25,marginBottom:12}}/>
             <p style={{fontSize:13,color:'var(--text-muted)',lineHeight:1.7,marginBottom:16}}>{t('fourAIEnginesDesc')}</p>
-            <button onClick={()=>setActivePage('settings')} className="btn btn-outline btn-sm" style={{gap:6}}>⚙️ {t('configureAIKeys')}</button>
+            <button onClick={()=>setActivePage('warfare')} className="btn btn-outline btn-sm" style={{gap:6}}>⚔️ {t('startWarfare')||'Start spiritual warfare'}</button>
           </div>
           <OrbitalRing size={220} radius={88} duration={20}/>
         </div>

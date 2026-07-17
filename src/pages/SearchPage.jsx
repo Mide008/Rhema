@@ -1,30 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useApp } from '@/lib/AppContext'
 import { useAI } from '@/lib/useAI'
+import { languageLabelFor } from '@/lib/aiServices'
 import { useTranslation } from '@/hooks/useTranslation'
 import { RevealCard } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
 
 export default function SearchPage() {
-  const { showToast } = useApp()
-  const { ask, loading } = useAI()
+  const { showToast, user } = useApp()
+  const { ask, loading, error } = useAI()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
+  const resultsRef = useRef(null)
 
   useEffect(() => {
     const savedQuery = sessionStorage.getItem('rhema_search_query')
     if (savedQuery) {
-      setQuery(savedQuery)
       sessionStorage.removeItem('rhema_search_query')
-      setTimeout(() => handleSearch(), 300)
+      setQuery(savedQuery)
+      handleSearch(null, savedQuery)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e, override) => {
     e?.preventDefault()
-    if (!query.trim()) {
+    const term = (override ?? query).trim()
+    if (!term) {
       showToast(t('noQuery') || 'Please enter a search term', '⚠️')
       return
     }
@@ -35,7 +39,7 @@ export default function SearchPage() {
     try {
       const prompt = `
         You are a pastoral AI assistant. The user is searching for scripture guidance.
-        Their search: "${query}".
+        Their search: "${term}".
         Suggest 4-6 relevant Bible verses. For each, provide the reference, the full verse text, and a brief reason.
         Return a valid JSON object with no extra text:
         {
@@ -45,7 +49,7 @@ export default function SearchPage() {
           ],
           "pastoral_note": "A warm, encouraging message (2-3 sentences)."
         }
-        Do not include any markdown or extra text. Return ONLY the JSON.
+        ${languageLabelFor(user.language)!=='English' ? `Respond fully in ${languageLabelFor(user.language)}.\n        ` : ''}Do not include any markdown or extra text. Return ONLY the JSON.
       `
       const response = await ask(prompt)
       if (response) {
@@ -61,13 +65,17 @@ export default function SearchPage() {
           showToast(t('noVersesFound'), '📖')
         } else {
           showToast(`${parsed.verses.length} ${t('versesFound')}`, '✨')
+          setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
         }
+      } else {
+        showToast(error || t('aiRequestFailed'), '❌')
       }
-    } catch (error) {
-      console.error('Search error:', error)
+    } catch (err) {
+      console.error('Search error:', err)
       showToast(t('aiRequestFailed'), '❌')
     }
   }
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -111,7 +119,7 @@ export default function SearchPage() {
       )}
 
       {!loading && results.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div ref={resultsRef} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {results.map((verse, idx) => (
             <div key={idx} className="verse-card">
               <span className="verse-ref">{verse.reference}</span>

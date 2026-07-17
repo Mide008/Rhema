@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
+import { languageLabelFor } from '@/lib/aiServices'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { TRANSLATIONS, parseVerseResponse } from '@/lib/bibleData'
@@ -26,7 +27,7 @@ export default function PrayerPage(){
   const [scriptures,setScriptures]=useState([])
   const [expanded,setExpanded]=useState(null)
   const [aiNote,setAiNote]=useState({})
-  const {getPrayerScripture,ask,loading}=useAI()
+  const {getPrayerScripture,ask,loading,error}=useAI()
 
   const filtered=prayers.filter(p=>
     tab==='Active'?p.status==='praying':
@@ -35,17 +36,26 @@ export default function PrayerPage(){
   )
 
   const submit=async()=>{
-    if(body.trim().length<5)return
+    if(body.trim().length<5){ showToast('Write a bit more about what you\'re praying for', '⚠️'); return }
     addPrayer({title:title||body.slice(0,40)+'…',text:body.trim(),category:cat,urgency,visibility:mode==='desk'?'church_team':'private'})
-    const raw=await getPrayerScripture({prayerText:body.trim(),translation:tran})
-    if(raw){const v=parseVerseResponse(raw);setScriptures(v)}
-    setTitle('');setBody('');setShowForm(false)
     showToast(t('prayerLogged'),'🙏')
+    const raw=await getPrayerScripture({prayerText:body.trim(),translation:tran,languageLabel:languageLabelFor(user.language)})
+    if(raw){
+      const v=parseVerseResponse(raw)
+      setScriptures(v)
+    } else {
+      showToast(error || 'Could not fetch a scripture for this prayer right now', '❌')
+    }
+    setTitle('');setBody('');setShowForm(false)
   }
 
   const genEncouragement=async(p)=>{
-    const raw=await ask(`Generate a short pastoral encouragement message for someone with this prayer request: "${p.text}". Be warm, scripture-based, 2-3 sentences. Plain text only.`)
-    if(raw)setAiNote(n=>({...n,[p.id]:raw}))
+    const raw=await ask(`Generate a short pastoral encouragement message for someone with this prayer request: "${p.text}". Be warm, scripture-based, 2-3 sentences. Plain text only.${languageLabelFor(user.language)!=='English'?` Respond fully in ${languageLabelFor(user.language)}.`:''}`)
+    if(raw){
+      setAiNote(n=>({...n,[p.id]:raw}))
+    } else {
+      showToast(error || t('aiRequestFailed'), '❌')
+    }
   }
 
   const shareWA=(p)=>{

@@ -17,7 +17,7 @@ export default function ConfessionsPage(){
   const services = useAIServices(ask)
   const [theme, setTheme] = useState('Identity & Purpose')
   const [tran, setTran] = useState(user.translation || 'KJV')
-  const [lang, setLang] = useState('en')
+  const [lang, setLang] = useState(user.language||'en')
   const [result, setResult] = useState(null)
   const [view, setView] = useState('generate')
 
@@ -26,7 +26,7 @@ export default function ConfessionsPage(){
     const langLabel = RESPONSE_LANGUAGES.find(l=>l.code===lang)?.label || 'English'
     const r = await services.generateConfessions({ theme, translation: tran, languageLabel: langLabel })
     if (r) { setResult(r); showToast('Declarations ready', '🕊') }
-    else showToast('Could not generate — check your AI keys in Settings', '❌')
+    else showToast('Could not generate right now — please try again in a moment', '❌')
   }
 
   const save = () => { if (result) saveConfessions({ theme, translation: tran, language: lang, ...result }) }

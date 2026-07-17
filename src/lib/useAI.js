@@ -56,8 +56,8 @@ export function useAI() {
     return ask(`Create a complete small group study on: "${theme}"${passage ? ` — passage: ${passage}` : ''}. Translation: ${translation}\n\nTHEME INTRODUCTION:\n[2-3 sentences]\n\nSCRIPTURE CLUSTER:\n[5 numbered verses with ref and exact text in ${translation}]\n\nCONTEXT NOTES:\n[3 sentences of background]\n\nDISCUSSION QUESTIONS:\nOPENING (Easy): [question]\nCORE 1 (Medium): [question]\nCORE 2 (Application): [question]\nDEEP (Challenging): [question]\nCLOSING (Prayer): [prompt]\n\nCLOSING REFLECTION:\n[2 sentences]`)
   }, [ask])
 
-  const getPrayerScripture = useCallback(async ({ prayerText, translation = 'KJV' }) => {
-    return ask(`Prayer request: "${prayerText}"\n\nGive 2 Bible verses that speak to this. Use ${translation}.\n\nVERSE: [ref] — [exact text]\nENCOURAGEMENT: [one warm pastoral sentence]\n\n---\n\nVERSE: [ref] — [exact text]\nENCOURAGEMENT: [one warm pastoral sentence]`)
+  const getPrayerScripture = useCallback(async ({ prayerText, translation = 'KJV', languageLabel = 'English' }) => {
+    return ask(`Prayer request: "${prayerText}"\n\nGive 2 Bible verses that speak to this. Use ${translation}.${languageLabel!=='English' ? ` Respond fully in ${languageLabel}.` : ''}\n\nVERSE: [ref] — [exact text]\nENCOURAGEMENT: [one warm pastoral sentence]\n\n---\n\nVERSE: [ref] — [exact text]\nENCOURAGEMENT: [one warm pastoral sentence]`)
   }, [ask])
 
   const getDailyDevotional = useCallback(async ({ verse, ref, translation = 'KJV' }) => {

@@ -14,6 +14,8 @@ const BIBLE_API_MAP = {
   CLEMENTINE: 'clementine', ALMEIDA: 'almeida', RCCV: 'rccv',
 }
 
+import { idbGet, idbSet } from '@/lib/idb'
+
 const CACHE_PREFIX = 'rhema_bible_cache_'
 const memCache = new Map()
 
@@ -25,9 +27,19 @@ function cacheGet(key) {
   } catch {}
   return null
 }
+async function cacheGetAsync(key) {
+  const hit = cacheGet(key)
+  if (hit) return hit
+  // localStorage missed (quota eviction, cleared, etc) — fall back to the
+  // larger-capacity IndexedDB store so already-read chapters still work offline.
+  const idbHit = await idbGet(CACHE_PREFIX + key)
+  if (idbHit) { memCache.set(key, idbHit); return idbHit }
+  return null
+}
 function cacheSet(key, value) {
   memCache.set(key, value)
   try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value)) } catch {}
+  idbSet(CACHE_PREFIX + key, value).catch(() => {})
 }
 
 async function fetchFromBibleApi(bookName, chapter, apiCode) {
@@ -61,7 +73,7 @@ async function fetchFromESVProxy(bookName, chapter) {
  */
 export async function fetchChapter(bookName, chapter, translationCode = 'KJV') {
   const cacheKey = `${bookName}_${chapter}_${translationCode}`
-  const cached = cacheGet(cacheKey)
+  const cached = await cacheGetAsync(cacheKey)
   if (cached) return cached
 
   // Try the server-side ESV proxy first if ESV was requested — it silently

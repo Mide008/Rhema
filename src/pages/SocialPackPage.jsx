@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
-import { SOCIAL_PACK_PROMPTS } from '@/lib/aiServices'
+import { SOCIAL_PACK_PROMPTS, languageLabelFor } from '@/lib/aiServices'
 import { LoadingPulse } from '@/components/ui/Loading'
 import EmptyState from '@/components/ui/EmptyState'
 import { RevealCard, MagneticBtn, MotionHeadline } from '@/components/ui/MotionComponents'
@@ -24,13 +24,25 @@ export default function SocialPackPage(){
   const [tone,setTone]=useState('Warm & inviting')
   const [contentType,setContentType]=useState('Sunday invitation')
   const [pack,setPack]=useState(null)
-  const {ask,loading}=useAI()
+  const {ask,loading,error}=useAI()
+  const resultRef=useRef(null)
 
   const gen=async()=>{
-    if(!topic.trim())return
+    if(!topic.trim()){ showToast('Enter a theme or topic first', '⚠️'); return }
     setPack(null)
-    const raw=await ask(SOCIAL_PACK_PROMPTS.generate({topic,scripture,church:church||'Our Church',platform,tone,contentType}))
-    if(raw){const j=parseJSON(raw);if(j)setPack(j)}
+    const raw=await ask(SOCIAL_PACK_PROMPTS.generate({topic,scripture,church:church||'Our Church',platform,tone,contentType,languageLabel:languageLabelFor(user.language)}))
+    if(raw){
+      const j=parseJSON(raw)
+      if(j){
+        setPack(j)
+        showToast('Your social pack is ready','✓')
+        setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100)
+      } else {
+        showToast(t('errorParsing'),'❌')
+      }
+    } else {
+      showToast(error || t('aiRequestFailed'), '❌')
+    }
   }
 
   const copy=(text)=>{navigator.clipboard.writeText(text).catch(()=>{});showToast(t('copied'),'📋')}
@@ -117,7 +129,7 @@ export default function SocialPackPage(){
             <AnimatePresence>{loading&&<LoadingPulse message={t('craftingSocial')}/>}</AnimatePresence>
             <AnimatePresence>
               {!loading&&pack&&(
-                <motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} style={{display:'flex',flexDirection:'column',gap:14}}>
+                <motion.div ref={resultRef} initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} style={{display:'flex',flexDirection:'column',gap:14}}>
                   <div className="ai-disclaimer"><span>✦</span><span>{t('aiDisclaimer')}</span></div>
                   {pack.instagram?.length>0&&<PostCard platformName="📸 Instagram" posts={pack.instagram}/>}
                   {pack.whatsapp?.length>0&&<PostCard platformName="💬 WhatsApp Status" posts={pack.whatsapp}/>}
