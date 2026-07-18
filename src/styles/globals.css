@@ -271,3 +271,13 @@ input,textarea,select{font-family:var(--font-sans);font-size:15px;color:var(--te
 .icon-glow {
   filter: drop-shadow(0 0 12px rgba(212,168,75,0.4));
 }
+
+/* Add this anywhere in your globals.css */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}

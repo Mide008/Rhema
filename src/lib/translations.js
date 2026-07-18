@@ -1,6 +1,9 @@
 // src/lib/translations.js
 export const translations = {
   en: {
+    weeklyFocusLabel: 'This week\'s focus',
+    weeklyFocusDesc: 'A curated space to reflect, pray, and grow around one theme at a time.',
+    exploreThisWeek: 'Explore this week',
     cookieTitle: 'Your privacy',
     cookieBody: 'We use essential local storage to save your prayers, sermons, and preferences on this device. We don\'t use tracking or advertising cookies.',
     cookieAccept: 'Accept',
@@ -443,6 +446,9 @@ export const translations = {
     startWarfare: 'Start spiritual warfare',
   },
   fr: {
+    weeklyFocusLabel: 'Le thème de la semaine',
+    weeklyFocusDesc: 'Un espace pensé pour méditer, prier et grandir autour d\'un thème à la fois.',
+    exploreThisWeek: 'Explorer cette semaine',
     cookieTitle: 'Votre vie privée',
     cookieBody: 'Nous utilisons un stockage local essentiel pour enregistrer vos prières, sermons et préférences sur cet appareil. Nous n\'utilisons pas de cookies de suivi ou publicitaires.',
     cookieAccept: 'Accepter',
@@ -862,6 +868,9 @@ export const translations = {
     startWarfare: 'Commencer le combat spirituel',
   },
   es: {
+    weeklyFocusLabel: 'El enfoque de esta semana',
+    weeklyFocusDesc: 'Un espacio pensado para reflexionar, orar y crecer en torno a un tema a la vez.',
+    exploreThisWeek: 'Explorar esta semana',
     cookieTitle: 'Tu privacidad',
     cookieBody: 'Usamos almacenamiento local esencial para guardar tus oraciones, sermones y preferencias en este dispositivo. No usamos cookies de seguimiento ni publicidad.',
     cookieAccept: 'Aceptar',
@@ -1281,6 +1290,9 @@ export const translations = {
     startWarfare: 'Comenzar guerra espiritual',
   },
   pcm: {
+    weeklyFocusLabel: 'Wetin we dey focus on dis week',
+    weeklyFocusDesc: 'Space wey we prepare make you fit reflect, pray, and grow for one theme at a time.',
+    exploreThisWeek: 'Explore dis week',
     cookieTitle: 'Your privacy',
     cookieBody: 'We dey use important local storage to save your prayers, sermons, and wetin you like for dis device. We no dey use tracking or advertising cookies.',
     cookieAccept: 'Accept',
@@ -1700,6 +1712,9 @@ export const translations = {
     startWarfare: 'Start spiritual warfare',
   },
   yo: {
+    weeklyFocusLabel: 'Ohun tí a fojú sí ọ̀sẹ̀ yìí',
+    weeklyFocusDesc: 'Ààyè kan láti ronú, gbàdúrà, kí o sì dàgbà nípa àkòrí kan ní àkókò kan.',
+    exploreThisWeek: 'Ṣàwárí ọ̀sẹ̀ yìí',
     cookieTitle: 'Ìpamọ́ ìkọ̀kọ̀ rẹ',
     cookieBody: 'A ń lo ìpamọ́ pàtàkì láti fi àwọn àdúrà, ìwàásù, àti àṣàyàn rẹ pamọ́ sí ẹ̀rọ yìí. A kò lo cookies fún ìwo tàbí ìpolówó.',
     cookieAccept: 'Gbà',
@@ -2119,6 +2134,9 @@ export const translations = {
     startWarfare: 'Bẹ̀rẹ̀ Ogun Ẹ̀mí',
   },
   ig: {
+    weeklyFocusLabel: 'Ihe a na-elekwasị anya izu a',
+    weeklyFocusDesc: 'Ohere e debere iji tụgharịa uche, kpee ekpere, na iji too gbasara otu isiokwu n otu oge.',
+    exploreThisWeek: 'Nyochaa izu a',
     cookieTitle: 'Nzuzo gị',
     cookieBody: 'Anyị na-eji nchekwa mpaghara dị mkpa chekwaa ekpere gị, nkwusa, na mmasị gị na ngwaọrụ a. Anyị anaghị eji cookies nleba anya ma ọ bụ mgbasa ozi.',
     cookieAccept: 'Nabata',

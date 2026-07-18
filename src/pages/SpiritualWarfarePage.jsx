@@ -7,6 +7,8 @@ import { useAIServices, RESPONSE_LANGUAGES } from '@/lib/aiServices'
 import { TRANSLATIONS } from '@/lib/bibleData'
 import { RevealCard, MagneticBtn, MotionHeadline } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
+import VerifiedBadge from '@/components/ui/VerifiedBadge'
+import { verifyReference } from '@/services/bibleApi'
 
 const QUICK_SITUATIONS = [
   { key:'fear', emoji:'😰', labelKey:'warfareFear' },
@@ -36,7 +38,17 @@ export default function SpiritualWarfarePage(){
     if (!situation.trim()) { showToast('Describe what you\'re facing first', '⚠️'); return }
     setResult(null)
     const r = await services.generateWarfare({ situation: situation.trim(), translation: tran, languageLabel: langLabel })
-    if (r) { setResult(r); showToast('Battle plan ready', '⚔️') }
+    if (r) {
+      setResult(r)
+      showToast('Battle plan ready', '⚔️')
+      if (r.battleScriptures?.length) {
+        const verified = await Promise.all(r.battleScriptures.map(async v => {
+          const res = await verifyReference(v.ref, tran)
+          return res.verified ? {...v, text: res.text, ref: res.reference, verifyStatus:'verified'} : {...v, verifyStatus:'unverified'}
+        }))
+        setResult(prev => prev ? {...prev, battleScriptures: verified} : prev)
+      }
+    }
     else showToast('Could not generate right now — please try again in a moment', '❌')
   }
 
@@ -129,7 +141,10 @@ export default function SpiritualWarfarePage(){
                   <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                     {result.battleScriptures?.map((v,i)=>(
                       <div key={i} className="verse-card" style={{ padding:'18px 22px' }}>
-                        <span className="verse-ref">{v.ref} · {tran}</span>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:6}}>
+                          <span className="verse-ref">{v.ref} · {tran}</span>
+                          <VerifiedBadge status={v.verifyStatus||'checking'}/>
+                        </div>
                         <p className="verse-text">{v.text}</p>
                       </div>
                     ))}

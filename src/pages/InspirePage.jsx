@@ -1,4 +1,3 @@
-// src/pages/InspirePage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -18,6 +17,17 @@ export default function InspirePage() {
   const [results, setResults] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
   const resultsRef = useRef(null)
+  const [recentSearches, setRecentSearches] = useState(()=>{
+    try { return JSON.parse(localStorage.getItem('rhema_recent_searches')||'[]') } catch { return [] }
+  })
+  const addRecentSearch = (term) => {
+    if (!term?.trim()) return
+    setRecentSearches(prev => {
+      const next = [term, ...prev.filter(x=>x.toLowerCase()!==term.toLowerCase())].slice(0,6)
+      localStorage.setItem('rhema_recent_searches', JSON.stringify(next))
+      return next
+    })
+  }
 
   const handleSearch = async (e, override) => {
     e?.preventDefault()
@@ -28,6 +38,7 @@ export default function InspirePage() {
     }
 
     setHasSearched(true)
+    addRecentSearch(searchTerm)
     setResults([])
 
     try {
@@ -125,6 +136,19 @@ export default function InspirePage() {
               {loading ? '...' : '🔍 Search'}
             </button>
           </form>
+
+          {recentSearches.length>0 && !hasSearched && (
+            <div style={{marginBottom:20}}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 8 }}>Recent searches</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                {recentSearches.map((term,i)=>(
+                  <button key={i} onClick={()=>{setQuery(term);handleSearch(null,term)}} className="tag tag-ink" style={{cursor:'pointer',padding:'6px 13px',fontSize:12}}>
+                    ↺ {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 8 }}>

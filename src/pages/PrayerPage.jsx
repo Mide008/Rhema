@@ -5,6 +5,8 @@ import { languageLabelFor } from '@/lib/aiServices'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { TRANSLATIONS, parseVerseResponse } from '@/lib/bibleData'
+import { verifyReference } from '@/services/bibleApi'
+import VerifiedBadge from '@/components/ui/VerifiedBadge'
 import { LoadingPulse } from '@/components/ui/Loading'
 import EmptyState from '@/components/ui/EmptyState'
 import { RevealCard, MagneticBtn, MotionHeadline } from '@/components/ui/MotionComponents'
@@ -51,7 +53,14 @@ export default function PrayerPage(){
     const raw=await getPrayerScripture({prayerText:body.trim(),translation:tran,languageLabel:languageLabelFor(user.language)})
     if(raw){
       const v=parseVerseResponse(raw)
-      setScriptures(v)
+      setScriptures(v.map(x=>({...x,verifyStatus:'checking'})))
+      const verified = await Promise.all(v.map(async x=>{
+        const result = await verifyReference(x.ref, tran)
+        return result.verified
+          ? {...x, text: result.text, ref: result.reference, verifyStatus:'verified'}
+          : {...x, verifyStatus:'unverified'}
+      }))
+      setScriptures(verified)
     } else {
       showToast(error || 'Could not fetch a scripture for this prayer right now', '❌')
     }
@@ -170,7 +179,10 @@ export default function PrayerPage(){
             <div style={{fontSize:13,fontWeight:500,color:'var(--text-secondary)',display:'flex',alignItems:'center',gap:8}}>{t('scriptureToStandOn')}</div>
             {scriptures.slice(0,2).map((v,i)=>(
               <div key={i} style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:16,padding:20}}>
-                <div className="verse-ref">{v.ref} · {v.translation}</div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:6}}>
+                  <div className="verse-ref">{v.ref} · {v.translation}</div>
+                  <VerifiedBadge status={v.verifyStatus||'checking'}/>
+                </div>
                 <p style={{fontFamily:'var(--font-serif)',fontSize:15,fontStyle:'italic',lineHeight:1.75,color:'var(--ink-800)',margin:'8px 0'}}>{v.text}</p>
                 {v.note&&<p style={{fontSize:13,color:'var(--ink-500)',lineHeight:1.6}}>{v.note}</p>}
               </div>

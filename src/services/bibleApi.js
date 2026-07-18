@@ -42,6 +42,56 @@ function cacheSet(key, value) {
   idbSet(CACHE_PREFIX + key, value).catch(() => {})
 }
 
+/**
+ * Verify a single scripture reference the AI returned (e.g. "Hebrews 11:1" or
+ * "Romans 8:28-39") by fetching the real text from bible-api.com directly —
+ * never trusting what the model recalled from memory. This is the core
+ * anti-hallucination step: any reference that doesn't resolve is either
+ * malformed or invented, and callers should treat it as unverified.
+ * Returns { verified: true, text, reference } or { verified: false, reason }.
+ */
+export async function verifyReference(reference, translationCode = 'KJV') {
+  if (!reference || typeof reference !== 'string') return { verified: false, reason: 'No reference given' }
+  const cacheKey = `verify_${reference}_${translationCode}`
+  const cached = await cacheGetAsync(cacheKey)
+  if (cached) return cached
+
+  const apiCode = BIBLE_API_MAP[translationCode] || 'kjv'
+  try {
+    const url = `https://bible-api.com/${encodeURIComponent(reference.trim())}?translation=${apiCode}`
+    const res = await fetch(url)
+    if (!res.ok) {
+      const result = { verified: false, reason: `Reference not found (${res.status})` }
+      return result
+    }
+    const data = await res.json()
+    if (!data?.text || !data?.verses?.length) {
+      return { verified: false, reason: 'Empty response — likely an invented or malformed reference' }
+    }
+    const result = {
+      verified: true,
+      text: data.text.trim().replace(/\s+/g, ' '),
+      reference: data.reference || reference,
+    }
+    cacheSet(cacheKey, result)
+    return result
+  } catch (err) {
+    return { verified: false, reason: 'Network error while verifying' }
+  }
+}
+
+/**
+ * Verify a batch of references in parallel — used to check every scripture
+ * an AI response cites (e.g. all points in a sermon) in one pass.
+ */
+export async function verifyReferences(references, translationCode = 'KJV') {
+  const unique = [...new Set(references.filter(Boolean))]
+  const results = await Promise.all(unique.map(ref => verifyReference(ref, translationCode)))
+  const map = {}
+  unique.forEach((ref, i) => { map[ref] = results[i] })
+  return map
+}
+
 async function fetchFromBibleApi(bookName, chapter, apiCode) {
   const ref = encodeURIComponent(`${bookName} ${chapter}`)
   const url = `https://bible-api.com/${ref}?translation=${apiCode}`

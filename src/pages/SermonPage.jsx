@@ -93,6 +93,35 @@ export default function SermonPage() {
 
   const fullText = () => sermon ? `${sermon.title}\n\nTheme: ${sermon.theme}\nScripture: ${sermon.mainText}\n\nINTRODUCTION\n${sermon.introduction}\n\n${sermon.points?.map((p,i)=>`POINT ${i+1}: ${p.title}\n${p.content}\n${p.scripture}`).join('\n\n')}\n\nAPPLICATION\n${sermon.application}\n\nALTAR CALL\n${sermon.altarCall}\n\nCLOSING PRAYER\n${sermon.closingPrayer}\n\n⚠️ AI-assisted — Rhema AI · OmniCraft Studios` : ''
 
+  const downloadPDF = () => {
+    if (!sermon) return
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${sermon.title}</title>
+      <style>
+        body{font-family:Georgia,serif;max-width:680px;margin:40px auto;color:#1C1710;line-height:1.7;padding:0 20px}
+        h1{font-size:26px;border-bottom:2px solid #D4A84B;padding-bottom:12px}
+        h2{font-size:15px;text-transform:uppercase;letter-spacing:0.06em;color:#8A6217;margin-top:28px}
+        p{font-size:14.5px}
+        .meta{font-size:13px;color:#666;margin-bottom:20px}
+        .footer{margin-top:40px;font-size:11px;color:#999;border-top:1px solid #ddd;padding-top:12px}
+        @media print{body{margin:0;padding:20px}}
+      </style></head><body>
+      <h1>${sermon.title}</h1>
+      <div class="meta">Theme: ${sermon.theme||''} &nbsp;·&nbsp; Scripture: ${sermon.mainText||''}</div>
+      <h2>Introduction</h2><p>${(sermon.introduction||'').replace(/\n/g,'<br/>')}</p>
+      ${(sermon.points||[]).map((p,i)=>`<h2>Point ${i+1}: ${p.title}</h2><p>${(p.content||'').replace(/\n/g,'<br/>')}</p><p><em>${p.scripture||''}</em></p>`).join('')}
+      <h2>Application</h2><p>${(sermon.application||'').replace(/\n/g,'<br/>')}</p>
+      <h2>Altar Call</h2><p>${(sermon.altarCall||'').replace(/\n/g,'<br/>')}</p>
+      <h2>Closing Prayer</h2><p>${(sermon.closingPrayer||'').replace(/\n/g,'<br/>')}</p>
+      <div class="footer">AI-assisted — verify all scripture before preaching. Rhema AI · OmniCraft Studios</div>
+      </body></html>`
+    const win = window.open('', '_blank')
+    if (!win) { showToast('Please allow pop-ups to download as PDF', '⚠️'); return }
+    win.document.write(html)
+    win.document.close()
+    win.focus()
+    setTimeout(()=>win.print(), 300)
+  }
+
   const tabs = [
     {id:'build', label:t('buildTab')},
     {id:'edit', label:t('editTab')},
@@ -187,6 +216,7 @@ export default function SermonPage() {
                     [t('youthVersionAction'), makeYouth, 'btn-outline'],
                     [t('preachingNotesAction'), getPreachNotes, 'btn-outline'],
                     [t('preachModeAction'), ()=>setPreachMode(true), 'btn-outline'],
+                    ['📄 Download PDF', downloadPDF, 'btn-outline'],
                   ].map(([label,action,cls])=>(
                     <button key={label} onClick={action} disabled={improving!=null} className={`btn ${cls} btn-sm`} style={{gap:5}}>{label}</button>
                   ))}

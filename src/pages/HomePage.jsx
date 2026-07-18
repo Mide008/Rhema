@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -6,8 +5,15 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { getTodayVerse, TOPICS, MOODS } from '@/lib/bibleData'
 import { MotionHeadline, RevealCard, CounterNumber, OrbitalRing, LiveTicker, MagneticBtn, GoldShimmer, NodeGraph, ScrollProgress, FloatingCard } from '@/components/ui/MotionComponents'
 import Icon3D from '@/components/ui/Icon3D'
+import { generateQuoteCardImage, downloadQuoteCard } from '@/lib/quoteCard'
 
 const today = getTodayVerse()
+function getWeeklyTopic(){
+  const d=new Date(); const start=new Date(d.getFullYear(),0,1)
+  const week=Math.ceil((((d-start)/86400000)+start.getDay()+1)/7)
+  return TOPICS[week % TOPICS.length]
+}
+const weeklyTopic = getWeeklyTopic()
 
 export default function HomePage() {
   const { setActivePage, savedVerses, prayers, sermons, showToast, user, setPendingChapter } = useApp()
@@ -18,6 +24,12 @@ export default function HomePage() {
     const m = `*${today.ref}* (${today.translation})\n\n_${today.text}_\n\n— Rhema AI · OmniCraft Studios 📖`
     window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank')
     showToast(t('shareToWhatsApp'), '💬')
+  }
+
+  const downloadCard = () => {
+    const dataUrl = generateQuoteCardImage({ text: today.text, reference: `${today.ref} · ${today.translation}` })
+    downloadQuoteCard(dataUrl, `rhema-${today.ref.replace(/\s+/g,'-').toLowerCase()}.png`)
+    showToast('Quote card downloaded', '🖼️')
   }
 
   return (
@@ -48,6 +60,7 @@ export default function HomePage() {
               </div>
               <div style={{display:'flex',gap:8}}>
                 <MagneticBtn onClick={share} className="btn btn-gold btn-sm">{t('shareVerse')}</MagneticBtn>
+                <button onClick={downloadCard} className="btn btn-sm" style={{background:'rgba(255,255,255,0.10)',color:'rgba(250,247,242,0.80)',border:'1px solid rgba(255,255,255,0.12)'}}>🖼️ Save image</button>
                 <button onClick={()=>{
                   const m = today.ref.match(/^(.+?)\s+(\d+):/)
                   if (m) setPendingChapter({ bookName: m[1], chapter: parseInt(m[2],10), translation: today.translation||'KJV' })
@@ -187,10 +200,10 @@ export default function HomePage() {
       <RevealCard delay={0.2}>
         <div style={{background:'linear-gradient(135deg,var(--gold-50),var(--bg-secondary))',borderRadius:24,padding:32,display:'flex',alignItems:'center',justifyContent:'space-around',flexWrap:'wrap',gap:24}}>
           <div style={{flex:1,minWidth:200}}>
-            <div style={{fontSize:10,letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--gold-700)',marginBottom:10}}>✦ {t('yourWalk')||'Your walk'}</div>
-            <MotionHeadline text={t('everythingYouNeed')||'Everything you need, in one place'} as="h2" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(20px,2.5vw,28px)',fontWeight:500,color:'var(--text-primary)',lineHeight:1.25,marginBottom:12}}/>
-            <p style={{fontSize:13,color:'var(--text-muted)',lineHeight:1.7,marginBottom:16}}>{t('fourAIEnginesDesc')}</p>
-            <button onClick={()=>setActivePage('warfare')} className="btn btn-outline btn-sm" style={{gap:6}}>⚔️ {t('startWarfare')||'Start spiritual warfare'}</button>
+            <div style={{fontSize:10,letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--gold-700)',marginBottom:10}}>✦ {t('weeklyFocusLabel')}</div>
+            <MotionHeadline text={t(weeklyTopic.labelKey)} as="h2" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(20px,2.5vw,28px)',fontWeight:500,color:'var(--text-primary)',lineHeight:1.25,marginBottom:12}}/>
+            <p style={{fontSize:13,color:'var(--text-muted)',lineHeight:1.7,marginBottom:16}}>{t('weeklyFocusDesc')}</p>
+            <button onClick={()=>{sessionStorage.setItem('rhema_search_query', t(weeklyTopic.labelKey)); setActivePage('inspire')}} className="btn btn-outline btn-sm" style={{gap:6}}>✦ {t('exploreThisWeek')}</button>
           </div>
           <OrbitalRing size={220} radius={88} duration={20}/>
         </div>

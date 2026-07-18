@@ -24,6 +24,23 @@ function todayVerseSeed(){
   return { ...ref, verseNum, day }
 }
 
+function computeStreak(devotionals){
+  const dates = new Set(devotionals.map(d=>d.date))
+  const todayStr = new Date().toISOString().split('T')[0]
+  let streak = 0
+  let cursor = new Date()
+  // If today isn't logged yet, start counting from yesterday so opening
+  // today still shows an accurate "so far" streak instead of dropping to 0.
+  if (!dates.has(todayStr)) cursor.setDate(cursor.getDate()-1)
+  while (true) {
+    const ds = cursor.toISOString().split('T')[0]
+    if (!dates.has(ds)) break
+    streak++
+    cursor.setDate(cursor.getDate()-1)
+  }
+  return streak
+}
+
 export default function DevotionalPage(){
   const { t } = useTranslation()
   const { showToast, devotionals, saveDevotional, user } = useApp()
@@ -59,15 +76,27 @@ export default function DevotionalPage(){
   }
 
   const past = devotionals.filter(d=>d.date!==today).sort((a,b)=>b.date.localeCompare(a.date))
+  const streak = computeStreak(devotionals)
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
       <RevealCard>
-        <div className="card-gold" style={{ padding:26 }}>
-          <div style={{ fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--gold-700)', marginBottom:8 }}>📖 Daily Devotional</div>
-          <h1 style={{ fontFamily:'var(--font-serif)', fontSize:'clamp(20px,3vw,28px)', fontWeight:500, color:'var(--ink-900)' }}>
-            {new Date().toLocaleDateString('en-US',{ weekday:'long', month:'long', day:'numeric' })}
-          </h1>
+        <div className="card-gold" style={{ padding:26, display:'flex', justifyContent:'space-between', alignItems:'flex-end', flexWrap:'wrap', gap:12 }}>
+          <div>
+            <div style={{ fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--gold-700)', marginBottom:8 }}>📖 Daily Devotional</div>
+            <h1 style={{ fontFamily:'var(--font-serif)', fontSize:'clamp(20px,3vw,28px)', fontWeight:500, color:'var(--ink-900)' }}>
+              {new Date().toLocaleDateString('en-US',{ weekday:'long', month:'long', day:'numeric' })}
+            </h1>
+          </div>
+          {streak>0 && (
+            <div style={{display:'flex',alignItems:'center',gap:8,background:'rgba(255,255,255,0.55)',border:'1px solid var(--border-gold)',borderRadius:14,padding:'8px 14px'}}>
+              <span style={{fontSize:20}}>🔥</span>
+              <div>
+                <div style={{fontSize:16,fontWeight:700,color:'var(--gold-800)',lineHeight:1}}>{streak}</div>
+                <div style={{fontSize:10,color:'var(--gold-700)',textTransform:'uppercase',letterSpacing:'0.04em'}}>{streak===1?'day streak':'day streak'}</div>
+              </div>
+            </div>
+          )}
         </div>
       </RevealCard>
 
