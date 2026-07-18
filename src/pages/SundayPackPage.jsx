@@ -26,7 +26,7 @@ export default function SundayPackPage(){
   const resultRef=useRef(null)
 
   const gen=async()=>{
-    if(!topic.trim()){ showToast('Enter a sermon topic first', '⚠️'); return }
+    if(!topic.trim()){ showToast(t('enterSermonTopicFirst'), '⚠️'); return }
     setPack(null)
     const raw=await ask(SUNDAY_PACK_PROMPTS.generate({topic,date,scripture,church:church||'Our Church',speaker,theme,announcements,languageLabel:languageLabelFor(user.language)}))
     if(raw){

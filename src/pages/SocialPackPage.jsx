@@ -28,7 +28,7 @@ export default function SocialPackPage(){
   const resultRef=useRef(null)
 
   const gen=async()=>{
-    if(!topic.trim()){ showToast('Enter a theme or topic first', '⚠️'); return }
+    if(!topic.trim()){ showToast(t('enterThemeFirst'), '⚠️'); return }
     setPack(null)
     const raw=await ask(SOCIAL_PACK_PROMPTS.generate({topic,scripture,church:church||'Our Church',platform,tone,contentType,languageLabel:languageLabelFor(user.language)}))
     if(raw){

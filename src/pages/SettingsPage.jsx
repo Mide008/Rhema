@@ -43,7 +43,7 @@ export default function SettingsPage(){
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2*1024*1024) { showToast('Image must be under 2MB','⚠️'); return }
+    if (file.size > 2*1024*1024) { showToast(t('imageTooLarge'),'⚠️'); return }
     const reader = new FileReader()
     reader.onload = () => { upd('photo', reader.result); showToast('Profile photo updated','✓') }
     reader.readAsDataURL(file)

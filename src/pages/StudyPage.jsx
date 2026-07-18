@@ -36,7 +36,7 @@ export default function StudyPage() {
   const resultRef = useRef(null)
 
   const gen = async () => {
-    if (!topic.trim()) { showToast('Enter a study theme first', '⚠️'); return }
+    if (!topic.trim()) { showToast(t('enterStudyThemeFirst'), '⚠️'); return }
     setGuide(null)
     const prompt = STUDY_GUIDE_PROMPTS.generate({ topic: topic+(passage?` (${passage})`:''), groupType, length, tone, numQuestions: numQ, translation: tran, languageLabel: languageLabelFor(user.language) })
     const raw = await ask(prompt)

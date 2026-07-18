@@ -9,14 +9,14 @@ import { RevealCard, MagneticBtn, MotionHeadline } from '@/components/ui/MotionC
 import EmptyState from '@/components/ui/EmptyState'
 
 const QUICK_SITUATIONS = [
-  { key:'fear', emoji:'😰', label:'Fear & anxiety' },
-  { key:'addiction', emoji:'⛓️', label:'Addiction' },
-  { key:'financial', emoji:'💰', label:'Financial crisis' },
-  { key:'sickness', emoji:'🩺', label:'Sickness' },
-  { key:'marriage', emoji:'💔', label:'Broken marriage' },
-  { key:'depression', emoji:'🌧', label:'Depression' },
-  { key:'unemployment', emoji:'📉', label:'Unemployment' },
-  { key:'family', emoji:'👪', label:'Family conflict' },
+  { key:'fear', emoji:'😰', labelKey:'warfareFear' },
+  { key:'addiction', emoji:'⛓️', labelKey:'warfareAddiction' },
+  { key:'financial', emoji:'💰', labelKey:'warfareFinancial' },
+  { key:'sickness', emoji:'🩺', labelKey:'warfareSickness' },
+  { key:'marriage', emoji:'💔', labelKey:'warfareMarriage' },
+  { key:'depression', emoji:'🌧', labelKey:'warfareDepression' },
+  { key:'unemployment', emoji:'📉', labelKey:'warfareUnemployment' },
+  { key:'family', emoji:'👪', labelKey:'warfareFamily' },
 ]
 
 export default function SpiritualWarfarePage(){
@@ -85,8 +85,8 @@ export default function SpiritualWarfarePage(){
                 <div style={{ fontSize:12, fontWeight:500, color:'var(--text-muted)', marginBottom:8 }}>Or start from a common battle:</div>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
                   {QUICK_SITUATIONS.map(q=>(
-                    <button key={q.key} onClick={()=>quickPick(q.label)} className="tag tag-gold" style={{ cursor:'pointer', padding:'7px 14px', fontSize:13 }}>
-                      {q.emoji} {q.label}
+                    <button key={q.key} onClick={()=>quickPick(t(q.labelKey))} className="tag tag-gold" style={{ cursor:'pointer', padding:'7px 14px', fontSize:13 }}>
+                      {q.emoji} {t(q.labelKey)}
                     </button>
                   ))}
                 </div>

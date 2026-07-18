@@ -59,7 +59,7 @@ input,textarea,select{font-family:var(--font-sans);font-size:15px;color:var(--te
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottomnav-h);background:rgba(250,247,242,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border-subtle);z-index:var(--z-nav);padding:0 var(--space-2);}
 .bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);color:var(--ink-400);transition:color var(--dur-fast) ease;flex:1;background:none;border:none;cursor:pointer;}
 .bottom-nav-item.active{color:var(--gold-600);}
-.bottom-nav-item span{font-size:10px;font-weight:500;letter-spacing:0.03em;}
+.bottom-nav-item span{font-size:9.5px;font-weight:500;letter-spacing:0.02em;text-align:center;line-height:1.2;max-width:100%;}
 
 @media(max-width:1024px){
   .sidebar{transform:translateX(-100%);transition:transform var(--dur-mid) var(--ease-out);}

@@ -15,6 +15,7 @@ export function AppProvider({children}){
   const[user,setUs]=useState(s?.user||DU)
   const userRef=useRef(user)
   useEffect(()=>{ userRef.current=user },[user])
+  useEffect(()=>{ document.documentElement.lang = user.language || 'en' },[user.language])
   useEffect(()=>{
     return startNotificationScheduler(()=>userRef.current)
   },[])

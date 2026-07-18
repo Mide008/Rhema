@@ -36,7 +36,7 @@ export default function PrayerPage(){
   )
 
   const submit=async()=>{
-    if(body.trim().length<5){ showToast('Write a bit more about what you\'re praying for', '⚠️'); return }
+    if(body.trim().length<5){ showToast(t('writeMorePrayer'), '⚠️'); return }
     addPrayer({title:title||body.slice(0,40)+'…',text:body.trim(),category:cat,urgency,visibility:mode==='desk'?'church_team':'private'})
     showToast(t('prayerLogged'),'🙏')
     const raw=await getPrayerScripture({prayerText:body.trim(),translation:tran,languageLabel:languageLabelFor(user.language)})
