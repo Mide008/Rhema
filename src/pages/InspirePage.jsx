@@ -1,3 +1,4 @@
+// src/pages/InspirePage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -9,7 +10,7 @@ import { RevealCard } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
 
 export default function InspirePage() {
-  const { showToast, setActivePage, user } = useApp()
+  const { showToast, setActivePage, user, setPendingVerse } = useApp()
   const { ask, loading, error } = useAI()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
@@ -20,7 +21,7 @@ export default function InspirePage() {
 
   const handleSearch = async (e, override) => {
     e?.preventDefault()
-    const searchTerm = (override ?? query).trim() || selectedMood?.label || ''
+    const searchTerm = (override ?? query).trim() || (selectedMood ? t(selectedMood.labelKey) : '')
     if (!searchTerm) {
       showToast(t('noQuery') || 'Please enter a topic or select a mood', '⚠️')
       return
@@ -215,10 +216,22 @@ export default function InspirePage() {
                   📋 {t('copy')}
                 </button>
                 <button
-                  onClick={() => setActivePage('sermon')}
+                  onClick={() => { setPendingVerse({ref:verse.reference,translation:user.translation||'KJV',text:verse.text||''}); setActivePage('sermon') }}
                   className="btn btn-outline btn-sm"
                 >
                   🎙 {t('sermon')}
+                </button>
+                <button
+                  onClick={() => { setPendingVerse({ref:verse.reference,translation:user.translation||'KJV',text:verse.text||''}); setActivePage('prayer') }}
+                  className="btn btn-outline btn-sm"
+                >
+                  🙏 {t('verseActionAddPrayer')}
+                </button>
+                <button
+                  onClick={() => { setPendingVerse({ref:verse.reference,translation:user.translation||'KJV',text:verse.text||''}); setActivePage('study') }}
+                  className="btn btn-outline btn-sm"
+                >
+                  📚 {t('verseActionAddStudy')}
                 </button>
               </div>
             </motion.div>

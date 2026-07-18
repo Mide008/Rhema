@@ -1,6 +1,8 @@
+// src/pages/SettingsPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
+import Icon3D from '@/components/ui/Icon3D'
 import { useTranslation } from '@/hooks/useTranslation'
 import { TRANSLATIONS } from '@/lib/bibleData'
 import { RevealCard } from '@/components/ui/MotionComponents'
@@ -74,7 +76,7 @@ export default function SettingsPage(){
   }
 
   const SECTIONS=[
-    {id:'profile',emoji:'👤',label:t('profile'),desc:user.name,content:(
+    {id:'profile',icon:'user',label:t('profile'),desc:user.name,content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         <div style={{display:'flex',alignItems:'center',gap:14}}>
           <div onClick={()=>fileRef.current?.click()} style={{width:64,height:64,borderRadius:'50%',background:user.photo?`url(${user.photo}) center/cover`:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:700,color:'var(--ink-900)',flexShrink:0,cursor:'pointer',border:'2px solid var(--border-gold)'}}>
@@ -96,7 +98,7 @@ export default function SettingsPage(){
         <button className="btn btn-gold" style={{alignSelf:'flex-start'}} onClick={()=>showToast(t('profileSaved'),'✓')}>{t('saveProfile')}</button>
       </div>
     )},
-    {id:'install',emoji:'📲',label:t('installApp'),desc:installed?t('installedDesc'):(platform.isIOS?'Add via Safari Share menu':(canInstall?t('installAvailable'):'Use browser menu → Install app')),content:(
+    {id:'install',icon:'install',label:t('installApp'),desc:installed?t('installedDesc'):(platform.isIOS?'Add via Safari Share menu':platform.isFirefox?'Firefox: use Add to Home screen':platform.isDesktopSafari?'Safari: use Add to Dock':(canInstall?t('installAvailable'):'Use browser menu → Install app')),content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,padding:14,fontSize:13,color:'var(--gold-800)',lineHeight:1.65}}>
           {t('installDesc')}
@@ -113,6 +115,22 @@ export default function SettingsPage(){
             </ol>
             {!platform.isSafari && <p style={{fontSize:12,color:'var(--terra-500)'}}>You're not in Safari right now — this only works from Safari, not Chrome/other browsers on iOS.</p>}
           </div>
+        ) : platform.isFirefox ? (
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <p style={{fontSize:13,color:'var(--text-muted)'}}>Firefox doesn't support automatic install prompts on any device. Add it manually:</p>
+            <ul style={{fontSize:13.5,color:'var(--text-primary)',lineHeight:2,paddingLeft:20}}>
+              <li><b>Android:</b> tap the menu (⋮) → <b>Add to Home screen</b></li>
+              <li><b>Desktop:</b> Firefox doesn't offer a home-screen install — switch to Chrome or Edge for the full app-like install</li>
+            </ul>
+          </div>
+        ) : platform.isDesktopSafari ? (
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <p style={{fontSize:13,color:'var(--text-muted)'}}>macOS Safari doesn't fire an automatic prompt. Add it manually:</p>
+            <ol style={{fontSize:13.5,color:'var(--text-primary)',lineHeight:2,paddingLeft:20}}>
+              <li>Open the <b>File</b> menu → <b>Add to Dock</b> <span style={{opacity:0.7}}>(Safari 17+)</span></li>
+              <li>On older Safari, use Share → Add to Dock/Home Screen</li>
+            </ol>
+          </div>
         ) : canInstall ? (
           <button className="btn btn-gold" onClick={async()=>{const c=await promptInstall();if(c?.outcome==='accepted')showToast(t('installedDesc'),'📲')}} style={{alignSelf:'flex-start'}}>
             📲 {t('installNow')}
@@ -128,7 +146,7 @@ export default function SettingsPage(){
         )}
       </div>
     )},
-    {id:'appearance',emoji:'🔠',label:t('appearance')||'Appearance',desc:`${Math.round(fontScale*100)}% text size`,content:(
+    {id:'appearance',icon:'textSize',label:t('appearance')||'Appearance',desc:`${Math.round(fontScale*100)}% text size`,content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         <div className="input-group">
           <label className="input-label">{t('textSize')||'Text size'}</label>
@@ -138,7 +156,7 @@ export default function SettingsPage(){
         <p style={{fontSize:{'--font-scale':fontScale}[0]?undefined:16*fontScale,color:'var(--text-primary)'}}>Preview: "The Lord is my shepherd, I shall not want."</p>
       </div>
     )},
-    {id:'bible',emoji:'📖',label:t('biblePreferences'),desc:user.translation||'KJV',content:(
+    {id:'bible',icon:'book',label:t('biblePreferences'),desc:user.translation||'KJV',content:(
       <div style={{display:'flex',flexDirection:'column',gap:16}}>
         <div className="input-group">
           <label className="input-label">{t('defaultTranslation')}</label>
@@ -154,7 +172,7 @@ export default function SettingsPage(){
         </div>
       </div>
     )},
-    {id:'notifications',emoji:'🔔',label:t('notifications'),desc:notifs.daily?`${t('dailyVerse')} at ${user.notifTime||'07:00'}`:t('notificationsDesc'),content:(
+    {id:'notifications',icon:'bell',label:t('notifications'),desc:notifs.daily?`${t('dailyVerse')} at ${user.notifTime||'07:00'}`:t('notificationsDesc'),content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         {[{key:'daily',label:t('dailyVerse'),desc:t('dailyVerseDesc')},{key:'sermon',label:t('sermonReminder'),desc:t('sermonReminderDesc')},{key:'prayer',label:t('prayerReminder'),desc:t('prayerReminderDesc')}].map(({key,label,desc})=>(
           <div key={key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--border-subtle)'}}>
@@ -176,7 +194,7 @@ export default function SettingsPage(){
         }}>{t('save')}</button>
       </div>
     )},
-    {id:'language',emoji:'🌐',label:t('language'),desc:LANGS.find(l=>l.code===user.language)?.label||'English',content:(
+    {id:'language',icon:'globe',label:t('language'),desc:LANGS.find(l=>l.code===user.language)?.label||'English',content:(
       <div style={{display:'flex',flexDirection:'column',gap:10}}>
         {LANGS.map(l=>(
           <button key={l.code} onClick={()=>handleLanguageChange(l.code)}
@@ -188,7 +206,7 @@ export default function SettingsPage(){
         <p style={{fontSize:11,color:'var(--text-muted)'}}>Nav, actions and core screens are translated. Deeper AI-generated content (sermons, devotionals) is asked for in this language directly.</p>
       </div>
     )},
-    {id:'privacy',emoji:'🔒',label:t('privacy'),desc:'Local-first storage',content:(
+    {id:'privacy',icon:'lock',label:t('privacy'),desc:'Local-first storage',content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,padding:14,fontSize:13,color:'var(--gold-800)',lineHeight:1.65}}>{t('dataPrivacy')}</div>
         <button onClick={handleExportData} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 0',background:'none',border:'none',cursor:'pointer',borderBottom:'1px solid var(--border-subtle)'}}>
@@ -206,7 +224,7 @@ export default function SettingsPage(){
         }
       </div>
     )},
-    {id:'about',emoji:'ℹ️',label:t('about'),desc:t('version'),content:(
+    {id:'about',icon:'info',label:t('about'),desc:t('version'),content:(
       <div style={{display:'flex',flexDirection:'column',gap:16}}>
         <div style={{textAlign:'center',padding:'20px 0'}}>
           <div style={{fontFamily:'var(--font-serif)',fontSize:32,fontWeight:600,color:'var(--gold-700)',marginBottom:6}}>Rhema AI</div>
@@ -242,9 +260,7 @@ export default function SettingsPage(){
       {SECTIONS.map((s,i)=>(
         <motion.div key={s.id} className="card" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.04}} style={{padding:0,overflow:'hidden'}}>
           <button onClick={()=>setOpen(open===s.id?null:s.id)} style={{width:'100%',display:'flex',alignItems:'center',gap:14,padding:'14px 20px',background:'none',border:'none',cursor:'pointer',textAlign:'left'}}>
-            <div style={{width:36,height:36,borderRadius:9,background:open===s.id?'var(--ink-900)':'var(--gold-100)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:18,transition:'all 0.15s'}}>
-              {s.emoji}
-            </div>
+            <Icon3D name={s.icon} tone="gold" active={open===s.id} size={16} badgeSize={36}/>
             <div style={{flex:1}}>
               <div style={{fontSize:14,fontWeight:500}}>{s.label}</div>
               <div style={{fontSize:12,color:'var(--text-muted)',marginTop:1}}>{s.desc}</div>

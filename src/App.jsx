@@ -7,6 +7,8 @@ import TopBar from '@/components/layout/TopBar'
 import BottomNav from '@/components/layout/BottomNav'
 import ToastStack from '@/components/ui/Toast'
 import OfflineBanner from '@/components/ui/OfflineBanner'
+import InstallBanner from '@/components/ui/InstallBanner'
+import CookieConsent from '@/components/ui/CookieConsent'
 
 const HomePage        = lazy(() => import('@/pages/HomePage'))
 const InspirePage     = lazy(() => import('@/pages/InspirePage'))
@@ -77,6 +79,8 @@ function Shell() {
       </div>
       <BottomNav/>
       <ToastStack/>
+      <InstallBanner/>
+      <CookieConsent/>
     </div>
   )
 }

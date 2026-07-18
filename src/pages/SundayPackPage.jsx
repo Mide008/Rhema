@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+// src/pages/SundayPackPage.jsx
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon3D from '@/components/ui/Icon3D'
 import { useAI } from '@/lib/useAI'
@@ -13,7 +14,7 @@ function parseJSON(raw){try{return JSON.parse(raw.replace(/```json|```/g,'').tri
 
 export default function SundayPackPage(){
   const { t } = useTranslation()
-  const {saveSundayPack,sundayPacks,showToast,user}=useApp()
+  const {saveSundayPack,sundayPacks,showToast,user,pendingVerse,setPendingVerse}=useApp()
   const [tab,setTab]=useState('Build')
   const [topic,setTopic]=useState('')
   const [date,setDate]=useState(new Date().toISOString().split('T')[0])
@@ -23,6 +24,15 @@ export default function SundayPackPage(){
   const [theme,setTheme]=useState('')
   const [announcements,setAnnouncements]=useState('')
   const [pack,setPack]=useState(null)
+
+  useEffect(() => {
+    if (!pendingVerse) return
+    setScripture(pendingVerse.ref)
+    setTab('Build')
+    setPendingVerse(null)
+    showToast(`${pendingVerse.ref} added to Sunday Pack`, '📎')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingVerse])
   const {ask,loading,error}=useAI()
   const resultRef=useRef(null)
 

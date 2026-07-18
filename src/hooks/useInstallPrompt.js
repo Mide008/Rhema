@@ -1,35 +1,36 @@
 // src/hooks/useInstallPrompt.js
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 function detectPlatform() {
-  // Guard against SSR / non-browser environments
-  if (typeof window === 'undefined') {
-    return { isIOS: false, isSafari: false, isAndroid: false }
-  }
   const ua = window.navigator.userAgent
   const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream
   const isSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)
   const isAndroid = /Android/.test(ua)
-  return { isIOS, isSafari, isAndroid }
+  const isFirefox = /Firefox|FxiOS/.test(ua)
+  const isDesktopSafari = !isIOS && /^((?!chrome|android|crios|fxios).)*safari/i.test(ua)
+  // Chrome, Edge, and Chromium-based browsers on Android and desktop are the
+  // only ones that implement beforeinstallprompt. Firefox (any platform) and
+  // desktop Safari never fire it — same gap as iOS, different browser.
+  const noAutoPrompt = isIOS || isFirefox || isDesktopSafari
+  return { isIOS, isSafari, isAndroid, isFirefox, isDesktopSafari, noAutoPrompt }
 }
 
 export function useInstallPrompt() {
-  // Compute platform once using useMemo – always returns an object
-  const platform = useMemo(() => detectPlatform(), [])
-  
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [installed, setInstalled] = useState(false)
   const [canInstall, setCanInstall] = useState(false)
+  const [platform] = useState(detectPlatform)
 
   useEffect(() => {
-    // Check if already installed
     const isStandalone =
       window.matchMedia?.('(display-mode: standalone)').matches ||
       window.navigator.standalone === true
     if (isStandalone) setInstalled(true)
 
-    // iOS Safari has no beforeinstallprompt API – skip event listeners
-    if (platform.isIOS) return
+    // Skip listening on browsers that structurally never fire this event —
+    // registering the listener there just wastes a subscription; it will
+    // never fire, and we show manual instructions instead.
+    if (platform.noAutoPrompt) return
 
     const onPrompt = (e) => {
       e.preventDefault()
@@ -47,7 +48,7 @@ export function useInstallPrompt() {
       window.removeEventListener('beforeinstallprompt', onPrompt)
       window.removeEventListener('appinstalled', onInstalled)
     }
-  }, [platform.isIOS])
+  }, [platform.noAutoPrompt])
 
   const promptInstall = useCallback(async () => {
     if (!deferredPrompt) return null

@@ -47,7 +47,10 @@ export function AppProvider({children}){
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
   const[sidebarOpen,setSidebarOpen]=useState(false)
+  const[sidebarCollapsed,setSidebarCollapsed]=useState(()=>localStorage.getItem('rhema_sidebar_collapsed')==='1')
+  useEffect(()=>{ localStorage.setItem('rhema_sidebar_collapsed', sidebarCollapsed?'1':'0') },[sidebarCollapsed])
   const[pendingVerse,setPendingVerse]=useState(null)
+  const[pendingChapter,setPendingChapter]=useState(null)
   const restoredFromIdb=useRef(false)
 
   useEffect(()=>{
@@ -96,7 +99,9 @@ export function AppProvider({children}){
     toasts,showToast,
     activePage,setActivePage,
     sidebarOpen,setSidebarOpen,
+    sidebarCollapsed,setSidebarCollapsed,
     pendingVerse,setPendingVerse,
+    pendingChapter,setPendingChapter,
   }}>{children}</Ctx.Provider>)
 }
 export function useApp(){const c=useContext(Ctx);if(!c)throw new Error('useApp outside AppProvider');return c}

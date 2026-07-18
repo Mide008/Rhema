@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/lib/useAI'
 import { languageLabelFor } from '@/lib/aiServices'
@@ -15,7 +15,7 @@ const STATUS_EMOJI={praying:'🙏',answered:'✅',archived:'📁'}
 
 export default function PrayerPage(){
   const { t } = useTranslation()
-  const {prayers,addPrayer,updatePrayer,deletePrayer,showToast,user}=useApp()
+  const {prayers,addPrayer,updatePrayer,deletePrayer,showToast,user,pendingVerse,setPendingVerse}=useApp()
   const [mode,setMode]=useState('journal')
   const [tab,setTab]=useState('Active')
   const [showForm,setShowForm]=useState(false)
@@ -23,6 +23,15 @@ export default function PrayerPage(){
   const [body,setBody]=useState('')
   const [cat,setCat]=useState('Personal')
   const [urgency,setUrgency]=useState('normal')
+
+  useEffect(() => {
+    if (!pendingVerse) return
+    setBody(`${pendingVerse.ref} — ${pendingVerse.text}\n\nLord, `)
+    setShowForm(true)
+    setPendingVerse(null)
+    showToast(`${pendingVerse.ref} added to your prayer`, '📎')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingVerse])
   const [tran,setTran]=useState(user.translation||'KJV')
   const [scriptures,setScriptures]=useState([])
   const [expanded,setExpanded]=useState(null)

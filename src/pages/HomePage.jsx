@@ -1,3 +1,4 @@
+// src/pages/HomePage.jsx
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -9,7 +10,7 @@ import Icon3D from '@/components/ui/Icon3D'
 const today = getTodayVerse()
 
 export default function HomePage() {
-  const { setActivePage, savedVerses, prayers, sermons, showToast, user } = useApp()
+  const { setActivePage, savedVerses, prayers, sermons, showToast, user, setPendingChapter } = useApp()
   const { t } = useTranslation()
   const [q, setQ] = useState('')
 
@@ -47,7 +48,11 @@ export default function HomePage() {
               </div>
               <div style={{display:'flex',gap:8}}>
                 <MagneticBtn onClick={share} className="btn btn-gold btn-sm">{t('shareVerse')}</MagneticBtn>
-                <button onClick={()=>setActivePage('bible')} className="btn btn-sm" style={{background:'rgba(255,255,255,0.10)',color:'rgba(250,247,242,0.80)',border:'1px solid rgba(255,255,255,0.12)'}}>{t('readChapter')}</button>
+                <button onClick={()=>{
+                  const m = today.ref.match(/^(.+?)\s+(\d+):/)
+                  if (m) setPendingChapter({ bookName: m[1], chapter: parseInt(m[2],10), translation: today.translation||'KJV' })
+                  setActivePage('bible')
+                }} className="btn btn-sm" style={{background:'rgba(255,255,255,0.10)',color:'rgba(250,247,242,0.80)',border:'1px solid rgba(255,255,255,0.12)'}}>{t('readChapter')}</button>
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+// src/pages/BiblePage.jsx
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -10,7 +11,7 @@ import { RevealCard } from '@/components/ui/MotionComponents'
 
 export default function BiblePage(){
   const { t } = useTranslation()
-  const {saveVerse,savedVerses,showToast,setActivePage,setPendingVerse,verseNotes,addVerseNote}=useApp()
+  const {saveVerse,savedVerses,showToast,setActivePage,setPendingVerse,verseNotes,addVerseNote,pendingChapter,setPendingChapter}=useApp()
   const {ask,loading}=useAI()
   const [view,setView]=useState('books')
   const [book,setBook]=useState(null)
@@ -26,6 +27,19 @@ export default function BiblePage(){
   const [verses,setVerses]=useState([])
   const [chapterLoading,setChapterLoading]=useState(false)
   const [chapterNote,setChapterNote]=useState(null)
+
+  useEffect(()=>{
+    if(!pendingChapter)return
+    const found=BIBLE_BOOKS.find(b=>b.name.toLowerCase()===pendingChapter.bookName.toLowerCase())
+    if(found){
+      setBook(found)
+      setCh(Math.min(pendingChapter.chapter,found.chapters))
+      if(pendingChapter.translation)setTran(pendingChapter.translation)
+      setView('reading')
+    }
+    setPendingChapter(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[pendingChapter])
 
   useEffect(()=>{
     if(view!=='reading'||!book)return

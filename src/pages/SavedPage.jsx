@@ -1,6 +1,7 @@
+// src/pages/SavedPage.jsx
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Icon3D from '@/components/ui/Icon3D'
+import Icon3D, { GLYPHS } from '@/components/ui/Icon3D'
 import { useApp } from '@/lib/AppContext'
 import { useAI } from '@/lib/useAI'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -60,10 +61,10 @@ export default function SavedPage(){
   }
 
   const TABS=[
-    {id:'Verses',e:'🔖',count:savedVerses.length},
-    {id:'Sermons',e:'🎙',count:sermons.length},
-    {id:'Studies',e:'📚',count:studyGuides.length},
-    {id:'Packs',e:'📋',count:sundayPacks.length+socialPacks.length}
+    {id:'Verses',icon:'bookmark',count:savedVerses.length},
+    {id:'Sermons',icon:'megaphone',count:sermons.length},
+    {id:'Studies',icon:'library',count:studyGuides.length},
+    {id:'Packs',icon:'church',count:sundayPacks.length+socialPacks.length}
   ]
 
   const tabLabels = {
@@ -81,7 +82,7 @@ export default function SavedPage(){
           {TABS.map(tabItem=>(
             <button key={tabItem.id} onClick={()=>setTab(tabItem.id)}
               style={{display:'flex',alignItems:'center',gap:6,padding:'9px 16px',borderRadius:12,fontSize:13,fontWeight:500,cursor:'pointer',background:tab===tabItem.id?'var(--ink-900)':'var(--bg-card)',color:tab===tabItem.id?'var(--text-inverse)':'var(--text-secondary)',border:`1px solid ${tab===tabItem.id?'transparent':'var(--border-subtle)'}`,transition:'all var(--dur-fast) ease'}}>
-              {tabItem.e} {tabLabels[tabItem.id] || tabItem.id} {tabItem.count>0&&<span style={{background:tab===tabItem.id?'rgba(255,255,255,0.2)':'var(--gold-100)',color:tab===tabItem.id?'white':'var(--gold-800)',borderRadius:10,padding:'1px 7px',fontSize:10}}>{tabItem.count}</span>}
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} style={{flexShrink:0}}>{GLYPHS[tabItem.icon]}</svg> {tabLabels[tabItem.id] || tabItem.id} {tabItem.count>0&&<span style={{background:tab===tabItem.id?'rgba(255,255,255,0.2)':'var(--gold-100)',color:tab===tabItem.id?'white':'var(--gold-800)',borderRadius:10,padding:'1px 7px',fontSize:10}}>{tabItem.count}</span>}
             </button>
           ))}
         </div>
@@ -109,20 +110,7 @@ export default function SavedPage(){
               <span style={{fontSize:12,color:'var(--text-muted)',whiteSpace:'nowrap'}}>{filtered.length} verse{filtered.length!==1?'s':''}</span>
             </div>
 
-            {/* AI result panel */}
-            <AnimatePresence>
-              {actionVerse&&(
-                <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={{opacity:0}} style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:16,padding:20}}>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-                    <span style={{fontSize:13,fontWeight:500,color:'var(--gold-800)'}}>{actionVerse.ref} — {aiType==='explain'?t('explanation'):aiType==='preach'?t('preachingAngles'):aiType==='counsel'?t('counsellingAngle'):t('youthFriendlyLabel')}</span>
-                    <button onClick={()=>{setActionVerse(null);setAiResult('')}} style={{background:'none',border:'none',cursor:'pointer',fontSize:18,color:'var(--text-muted)'}}>×</button>
-                  </div>
-                  {loading?<div className="loading-dots"><div className="loading-dot"/><div className="loading-dot"/><div className="loading-dot"/></div>
-                    :<p style={{fontSize:14,color:'var(--ink-700)',lineHeight:1.75,whiteSpace:'pre-wrap'}}>{aiResult}</p>
-                  }
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* AI result now renders inline under the clicked card, not here */}
 
             {filtered.length===0
               ?<EmptyState icon="🔖" headline={t('noSavedVersesTitle')} body={t('noSavedVersesBody')} ctaLabel={t('exploreScriptures')} onCta={()=>setActivePage('inspire')}/>
@@ -161,6 +149,21 @@ export default function SavedPage(){
                         <button onClick={()=>aiAction('youth',v)} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('youthFriendly')}</button>
                         <button onClick={()=>{const n=prompt(`Note for ${v.ref}:`);if(n)addVerseNote(v.ref,v.text,n,null,v.tags||[])}} className="btn btn-sm" style={{background:'var(--bg-primary)',border:'1px solid var(--border-subtle)',fontSize:11,padding:'5px 10px'}}>{t('savedNote')}</button>
                       </div>
+                      <AnimatePresence>
+                        {actionVerse?.id===v.id&&(
+                          <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={{opacity:0,height:0}} style={{overflow:'hidden'}}>
+                            <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:14,padding:16,marginTop:10}}>
+                              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                                <span style={{fontSize:13,fontWeight:500,color:'var(--gold-800)'}}>{aiType==='explain'?t('explanation'):aiType==='preach'?t('preachingAngles'):aiType==='counsel'?t('counsellingAngle'):t('youthFriendlyLabel')}</span>
+                                <button onClick={()=>{setActionVerse(null);setAiResult('')}} style={{background:'none',border:'none',cursor:'pointer',fontSize:18,color:'var(--text-muted)'}}>×</button>
+                              </div>
+                              {loading?<div className="loading-dots"><div className="loading-dot"/><div className="loading-dot"/><div className="loading-dot"/></div>
+                                :<p style={{fontSize:14,color:'var(--ink-700)',lineHeight:1.75,whiteSpace:'pre-wrap'}}>{aiResult}</p>
+                              }
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   )
                 })}

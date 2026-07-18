@@ -1,3 +1,4 @@
+// src/pages/SearchPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '@/lib/AppContext'
 import { useAI } from '@/lib/useAI'
@@ -7,7 +8,7 @@ import { RevealCard } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
 
 export default function SearchPage() {
-  const { showToast, user } = useApp()
+  const { showToast, user, setActivePage, setPendingVerse } = useApp()
   const { ask, loading, error } = useAI()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
@@ -129,6 +130,39 @@ export default function SearchPage() {
                   {verse.reason}
                 </p>
               )}
+              <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    const msg = `*${verse.reference}*\n\n_${verse.text || ''}_\n\n— Rhema AI 📖`
+                    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+                    showToast(t('shareToWhatsApp'), '💬')
+                  }}
+                  className="btn btn-gold btn-sm"
+                >
+                  💬 {t('share')}
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${verse.reference}: ${verse.text || ''}`)
+                    showToast(t('copied'), '📋')
+                  }}
+                  className="btn btn-outline btn-sm"
+                >
+                  📋 {t('copy')}
+                </button>
+                <button
+                  onClick={() => { setPendingVerse({ref:verse.reference,translation:user.translation||'KJV',text:verse.text||''}); setActivePage('sermon') }}
+                  className="btn btn-outline btn-sm"
+                >
+                  🎙 {t('sermon')}
+                </button>
+                <button
+                  onClick={() => { setPendingVerse({ref:verse.reference,translation:user.translation||'KJV',text:verse.text||''}); setActivePage('prayer') }}
+                  className="btn btn-outline btn-sm"
+                >
+                  🙏 {t('verseActionAddPrayer')}
+                </button>
+              </div>
             </div>
           ))}
         </div>

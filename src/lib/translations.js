@@ -1,6 +1,11 @@
 // src/lib/translations.js
 export const translations = {
   en: {
+    cookieTitle: 'Your privacy',
+    cookieBody: 'We use essential local storage to save your prayers, sermons, and preferences on this device. We don\'t use tracking or advertising cookies.',
+    cookieAccept: 'Accept',
+    cookieDecline: 'Decline non-essential',
+    cookieLearnMore: 'Learn more',
     warfareFear: 'Fear & anxiety',
     warfareAddiction: 'Addiction',
     warfareFinancial: 'Financial crisis',
@@ -438,6 +443,11 @@ export const translations = {
     startWarfare: 'Start spiritual warfare',
   },
   fr: {
+    cookieTitle: 'Votre vie privée',
+    cookieBody: 'Nous utilisons un stockage local essentiel pour enregistrer vos prières, sermons et préférences sur cet appareil. Nous n\'utilisons pas de cookies de suivi ou publicitaires.',
+    cookieAccept: 'Accepter',
+    cookieDecline: 'Refuser le non essentiel',
+    cookieLearnMore: 'En savoir plus',
     warfareFear: 'Peur et anxiété',
     warfareAddiction: 'Dépendance',
     warfareFinancial: 'Crise financière',
@@ -852,6 +862,11 @@ export const translations = {
     startWarfare: 'Commencer le combat spirituel',
   },
   es: {
+    cookieTitle: 'Tu privacidad',
+    cookieBody: 'Usamos almacenamiento local esencial para guardar tus oraciones, sermones y preferencias en este dispositivo. No usamos cookies de seguimiento ni publicidad.',
+    cookieAccept: 'Aceptar',
+    cookieDecline: 'Rechazar no esenciales',
+    cookieLearnMore: 'Más información',
     warfareFear: 'Miedo y ansiedad',
     warfareAddiction: 'Adicción',
     warfareFinancial: 'Crisis financiera',
@@ -1266,6 +1281,11 @@ export const translations = {
     startWarfare: 'Comenzar guerra espiritual',
   },
   pcm: {
+    cookieTitle: 'Your privacy',
+    cookieBody: 'We dey use important local storage to save your prayers, sermons, and wetin you like for dis device. We no dey use tracking or advertising cookies.',
+    cookieAccept: 'Accept',
+    cookieDecline: 'Decline wetin no important',
+    cookieLearnMore: 'Learn more',
     warfareFear: 'Fear & worry',
     warfareAddiction: 'Addiction',
     warfareFinancial: 'Money crisis',
@@ -1680,6 +1700,11 @@ export const translations = {
     startWarfare: 'Start spiritual warfare',
   },
   yo: {
+    cookieTitle: 'Ìpamọ́ ìkọ̀kọ̀ rẹ',
+    cookieBody: 'A ń lo ìpamọ́ pàtàkì láti fi àwọn àdúrà, ìwàásù, àti àṣàyàn rẹ pamọ́ sí ẹ̀rọ yìí. A kò lo cookies fún ìwo tàbí ìpolówó.',
+    cookieAccept: 'Gbà',
+    cookieDecline: 'Kọ àwọn tí kò pàtàkì',
+    cookieLearnMore: 'Mọ̀ síi',
     warfareFear: 'Ìbẹ̀rù àti àníyàn',
     warfareAddiction: 'Ìfọwọ́sowọ́pọ̀',
     warfareFinancial: 'Ìṣòro Owó',
@@ -2094,6 +2119,11 @@ export const translations = {
     startWarfare: 'Bẹ̀rẹ̀ Ogun Ẹ̀mí',
   },
   ig: {
+    cookieTitle: 'Nzuzo gị',
+    cookieBody: 'Anyị na-eji nchekwa mpaghara dị mkpa chekwaa ekpere gị, nkwusa, na mmasị gị na ngwaọrụ a. Anyị anaghị eji cookies nleba anya ma ọ bụ mgbasa ozi.',
+    cookieAccept: 'Nabata',
+    cookieDecline: 'Jụ ndị na-adịghị mkpa',
+    cookieLearnMore: 'Mụtakwuo',
     warfareFear: 'Ụjọ na nchegbu',
     warfareAddiction: 'Njide',
     warfareFinancial: 'Nsogbu Ego',

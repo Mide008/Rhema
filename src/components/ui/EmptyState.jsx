@@ -1,5 +1,4 @@
-// src/components/ui/EmptyState.jsx
-import { motion } from 'framer-motion'
+import{motion}from'framer-motion'
 import Icon3D from './Icon3D'
 
 // Emoji-to-vector-icon map so every existing call site (which passes an emoji

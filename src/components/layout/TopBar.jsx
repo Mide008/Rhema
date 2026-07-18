@@ -1,6 +1,7 @@
 // src/components/layout/TopBar.jsx
 import { motion } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
+import { GLYPHS } from '@/components/ui/Icon3D'
 
 const TITLES={home:'Dashboard',bible:'Bible Reader',inspire:'Inspiration',search:'Topic Search',sermon:'Sermon Studio',sunday:'Sunday Pack',social:'Social Pack',study:'Study Guide',prayer:'Prayer Desk',saved:'Saved Verses',settings:'Settings'}
 
@@ -9,7 +10,7 @@ export default function TopBar(){
   const h=new Date().getHours()
   const gr=h<12?'Good morning':h<17?'Good afternoon':'Good evening'
   return(
-    <header style={{height:'var(--topbar-h)',background:'rgba(255,255,255,0.94)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',borderBottom:'1px solid var(--border-subtle)',display:'flex',alignItems:'center',padding:'0 var(--space-8)',position:'sticky',top:0,zIndex:'var(--z-above)'}}>
+    <header className="topbar" style={{background:'rgba(255,255,255,0.94)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center'}}>
       <button className="mobile-only" onClick={()=>setSidebarOpen(true)} aria-label="Open menu" style={{marginRight:12,background:'none',border:'none',cursor:'pointer',color:'var(--text-secondary)',display:'flex',alignItems:'center',padding:6}}>
         <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
@@ -28,7 +29,7 @@ export default function TopBar(){
           </svg>
           <span style={{position:'absolute',top:4,right:4,width:7,height:7,borderRadius:'50%',background:'var(--gold-500)',border:'2px solid #FFF'}}/>
         </button>
-        <div style={{width:34,height:34,borderRadius:'50%',background:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'var(--ink-900)',cursor:'pointer',boxShadow:'var(--shadow-sm)',flexShrink:0}}>{(user?.name||'R').slice(0,2).toUpperCase()}</div>
+        <div style={{width:34,height:34,borderRadius:'50%',background:user?.photo?`url(${user.photo}) center/cover`:'linear-gradient(135deg,var(--gold-400),var(--gold-700))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'var(--ink-900)',cursor:'pointer',boxShadow:'var(--shadow-sm)',flexShrink:0}}>{!user?.photo&&(user?.name||'R').slice(0,2).toUpperCase()}</div>
       </div>
     </header>
   )

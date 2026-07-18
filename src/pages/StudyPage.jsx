@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+// src/pages/StudyPage.jsx
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon3D from '@/components/ui/Icon3D'
 import { useAI } from '@/lib/useAI'
@@ -22,7 +23,7 @@ function parseJSON(raw) {
 
 export default function StudyPage() {
   const { t } = useTranslation()
-  const { user, saveStudyGuide, studyGuides, showToast } = useApp()
+  const { user, saveStudyGuide, studyGuides, showToast, pendingVerse, setPendingVerse } = useApp()
   const [tab, setTab] = useState('Build')
   const [topic, setTopic] = useState('')
   const [passage, setPassage] = useState('')
@@ -35,6 +36,16 @@ export default function StudyPage() {
   const [open, setOpen] = useState({})
   const { ask, loading, error } = useAI()
   const resultRef = useRef(null)
+
+  useEffect(() => {
+    if (!pendingVerse) return
+    setPassage(pendingVerse.ref)
+    setTopic(prev => prev || pendingVerse.ref)
+    setTab('Build')
+    setPendingVerse(null)
+    showToast(`${pendingVerse.ref} added to Study Guide`, '📎')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingVerse])
 
   const gen = async () => {
     if (!topic.trim()) { showToast(t('enterStudyThemeFirst'), '⚠️'); return }

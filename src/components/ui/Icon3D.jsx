@@ -52,6 +52,39 @@ const GLYPHS = {
   heart: (
     <path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 5 5.7 5 8 5 10 6.3 12 8.6 14 6.3 16 5 18.3 5c3.4 0 5.3 3.4 3.7 6.7C19.5 16.4 12 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
   ),
+  user: (
+    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  bell: (
+    <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9ZM13.7 21a2 2 0 0 1-3.4 0" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  lock: (
+    <path d="M6 11V8a6 6 0 1 1 12 0v3M5 11h14v10H5V11Zm7 5v2" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  info: (
+    <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v6M12 7.5v.01" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  textSize: (
+    <path d="M4 7V5h11v2M9.5 5v14M7 19h5M15 12h5M17.5 12v7M16 19h3" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  calendar: (
+    <path d="M7 3v3M17 3v3M4 9h16M5 6h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  sun: (
+    <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  shield: (
+    <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3ZM9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  scroll: (
+    <path d="M8 3h11v14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a3 3 0 0 0-3-3h6ZM9 8h6M9 12h6" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  chart: (
+    <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  check: (
+    <path d="M4 12.5l5 5L20 6" strokeLinecap="round" strokeLinejoin="round" />
+  ),
 }
 
 // Warm gold-to-ink gradient badge with an inner bevel highlight and soft
@@ -59,6 +92,7 @@ const GLYPHS = {
 // wherever a structural icon appears (nav, quick actions, section headers).
 export default function Icon3D({ name, size = 22, badgeSize = 44, tone = 'gold', active = false }) {
   const glyph = GLYPHS[name] || GLYPHS.sparkle
+  const uid = `${name}-${tone}-${active ? 'a' : 'i'}`
   const tones = {
     gold: { from: '#F2D98A', to: '#B8862E', stroke: '#3A2A0E' },
     ink: { from: '#4A4438', to: '#1C1710', stroke: '#EFE6D4' },
