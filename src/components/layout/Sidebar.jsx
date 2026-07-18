@@ -2,29 +2,30 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
+import Icon3D, { GLYPHS } from '@/components/ui/Icon3D'
 
 function buildNav(t){
   return [
     {label:'',items:[
-      {id:'home',   emoji:'🏠',label:t('navHome')},
-      {id:'bible',  emoji:'📖',label:t('navBible')},
-      {id:'inspire',emoji:'✨',label:t('navInspire')},
-      {id:'search', emoji:'🔍',label:t('navSearch')},
+      {id:'home',   icon:'home',label:t('navHome')},
+      {id:'bible',  icon:'book',label:t('navBible')},
+      {id:'inspire',icon:'sparkle',label:t('navInspire')},
+      {id:'search', icon:'search',label:t('navSearch')},
     ]},
     {label:t('navGrowthSection'),items:[
-      {id:'devotional',  emoji:'☀️',label:t('navDevotional')},
-      {id:'warfare',     emoji:'⚔️',label:t('navWarfare')},
-      {id:'confessions', emoji:'🕊',label:t('navConfessions')},
-      {id:'prayer', emoji:'🙏',label:t('navPrayer')},
+      {id:'devotional',  icon:'leaf',label:t('navDevotional')},
+      {id:'warfare',     icon:'sword',label:t('navWarfare')},
+      {id:'confessions', icon:'heart',label:t('navConfessions')},
+      {id:'prayer', icon:'praying',label:t('navPrayer')},
     ]},
     {label:t('navMinistrySection'),items:[
-      {id:'sermon', emoji:'🎙',label:t('navSermon')},
-      {id:'sunday', emoji:'📋',label:t('navSunday')},
-      {id:'social', emoji:'📱',label:t('navSocial')},
-      {id:'study',  emoji:'📚',label:t('navStudy')},
+      {id:'sermon', icon:'megaphone',label:t('navSermon')},
+      {id:'sunday', icon:'church',label:t('navSunday')},
+      {id:'social', icon:'globe',label:t('navSocial')},
+      {id:'study',  icon:'library',label:t('navStudy')},
     ]},
     {label:t('navLibrarySection'),items:[
-      {id:'saved',  emoji:'🔖',label:t('navSaved')},
+      {id:'saved',  icon:'bookmark',label:t('navSaved')},
     ]},
   ]
 }
@@ -75,7 +76,7 @@ function Inner({activePage,go,user,NAV,t}){
                   aria-current={active?'page':undefined}
                   style={{display:'flex',alignItems:'center',gap:'var(--space-3)',padding:'10px var(--space-4)',borderRadius:'var(--radius-md)',color:active?'var(--gold-300)':'rgba(250,247,242,0.52)',background:active?'rgba(212,168,75,0.12)':'transparent',fontSize:14,fontWeight:400,cursor:'pointer',width:'100%',border:'none',transition:'all var(--dur-fast) ease',position:'relative',justifyContent:'flex-start'}}>
                   {active&&<span style={{position:'absolute',left:-1,top:'50%',transform:'translateY(-50%)',width:3,height:'60%',background:'var(--gold-400)',borderRadius:'0 2px 2px 0'}}/>}
-                  <span style={{fontSize:16}}>{item.emoji}</span>
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} style={{flexShrink:0}}>{GLYPHS[item.icon]}</svg>
                   <span style={{flex:1,textAlign:'left'}}>{item.label}</span>
                   {active&&<div style={{width:5,height:5,borderRadius:'50%',background:'var(--gold-400)'}}/>}
                 </motion.button>

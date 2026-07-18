@@ -85,8 +85,9 @@ export default function InspirePage() {
 
   const handleMoodClick = (mood) => {
     setSelectedMood(mood)
-    setQuery(mood.label)
-    handleSearch(null, mood.label)
+    const label = t(mood.labelKey)
+    setQuery(label)
+    handleSearch(null, label)
   }
 
   return (
@@ -138,7 +139,7 @@ export default function InspirePage() {
                   whileHover={{ y: -2 }}
                 >
                   <span className="mood-emoji">{mood.emoji}</span>
-                  <span className="mood-label">{mood.label}</span>
+                  <span className="mood-label">{t(mood.labelKey)}</span>
                 </motion.button>
               ))}
             </div>

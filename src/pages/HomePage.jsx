@@ -4,6 +4,7 @@ import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { getTodayVerse, TOPICS, MOODS } from '@/lib/bibleData'
 import { MotionHeadline, RevealCard, CounterNumber, OrbitalRing, LiveTicker, MagneticBtn, GoldShimmer, NodeGraph, ScrollProgress, FloatingCard } from '@/components/ui/MotionComponents'
+import Icon3D from '@/components/ui/Icon3D'
 
 const today = getTodayVerse()
 
@@ -68,8 +69,8 @@ export default function HomePage() {
         </form>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:14}}>
           {TOPICS.slice(0,10).map(topic => (
-            <motion.button key={topic} className="tag tag-gold" whileHover={{scale:1.05}} whileTap={{scale:0.96}}
-              onClick={()=>{sessionStorage.setItem('rhema_search_query', topic); setActivePage('inspire')}} style={{cursor:'pointer',fontSize:12,padding:'5px 13px'}}>{topic}</motion.button>
+            <motion.button key={topic.key} className="tag tag-gold" whileHover={{scale:1.05}} whileTap={{scale:0.96}}
+              onClick={()=>{sessionStorage.setItem('rhema_search_query', t(topic.labelKey)); setActivePage('inspire')}} style={{cursor:'pointer',fontSize:12,padding:'5px 13px'}}>{t(topic.labelKey)}</motion.button>
           ))}
         </div>
       </RevealCard>
@@ -101,18 +102,20 @@ export default function HomePage() {
         </h2>
         <div className="grid-2" style={{gap:14}}>
           {[
-            {id:'inspire',emoji:'✨',label:t('getInspired'),desc:t('getInspiredDesc'),bg:'linear-gradient(135deg,#FDF6E8,#F5E6C8)'},
-            {id:'warfare',emoji:'⚔️',label:t('navWarfare'),desc:'Prayer points, scripture & strategy',bg:'linear-gradient(135deg,#F3E8E8,#E8D0D0)'},
-            {id:'devotional',emoji:'☀️',label:t('navDevotional'),desc:"Today's verse, reflection & prayer",bg:'linear-gradient(135deg,#F5F0E0,#EBDFC0)'},
-            {id:'sermon', emoji:'🎙',label:t('sermonBuilder'),desc:t('sermonBuilderDesc'),bg:'linear-gradient(135deg,#F5EDE8,#EDD5C8)'},
-            {id:'bible',  emoji:'📖',label:t('bibleReader'),desc:t('bibleReaderDesc'),bg:'linear-gradient(135deg,#EBF0EB,#D8E8D6)'},
-            {id:'prayer', emoji:'🙏',label:t('prayerJournal'),desc:t('prayerJournalDesc'),bg:'linear-gradient(135deg,#EDE8F0,#D8D0E8)'},
+            {id:'inspire',icon:'sparkle',tone:'gold',label:t('getInspired'),desc:t('getInspiredDesc'),bg:'linear-gradient(135deg,#FDF6E8,#F5E6C8)'},
+            {id:'warfare',icon:'sword',tone:'ink',label:t('navWarfare'),desc:t('warfareCardDesc'),bg:'linear-gradient(135deg,#F3E8E8,#E8D0D0)'},
+            {id:'devotional',icon:'leaf',tone:'sage',label:t('navDevotional'),desc:t('devotionalCardDesc'),bg:'linear-gradient(135deg,#F5F0E0,#EBDFC0)'},
+            {id:'sermon', icon:'megaphone',tone:'ink',label:t('sermonBuilder'),desc:t('sermonBuilderDesc'),bg:'linear-gradient(135deg,#F5EDE8,#EDD5C8)'},
+            {id:'bible',  icon:'book',tone:'gold',label:t('bibleReader'),desc:t('bibleReaderDesc'),bg:'linear-gradient(135deg,#EBF0EB,#D8E8D6)'},
+            {id:'prayer', icon:'praying',tone:'sage',label:t('prayerJournal'),desc:t('prayerJournalDesc'),bg:'linear-gradient(135deg,#EDE8F0,#D8D0E8)'},
           ].map((a,i)=>(
             <motion.button key={a.id} onClick={()=>setActivePage(a.id)}
               whileHover={{y:-4,boxShadow:'0 16px 40px rgba(28,23,16,0.12)'}} whileTap={{scale:0.97}}
               initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:0.18+i*0.07}}
               style={{background:a.bg,border:'1px solid var(--border-subtle)',borderRadius:20,padding:22,display:'flex',flexDirection:'column',gap:12,cursor:'pointer',textAlign:'left',transition:'box-shadow 0.2s'}}>
-              <motion.span animate={{y:[-2,2,-2]}} transition={{duration:3+i*0.4,repeat:Infinity,ease:'easeInOut'}} style={{fontSize:32}}>{a.emoji}</motion.span>
+              <motion.div animate={{y:[-2,2,-2]}} transition={{duration:3+i*0.4,repeat:Infinity,ease:'easeInOut'}}>
+                <Icon3D name={a.icon} tone={a.tone} active size={20} badgeSize={44}/>
+              </motion.div>
               <div>
                 <div style={{fontSize:15,fontWeight:500,color:'var(--text-primary)',marginBottom:3}}>{a.label}</div>
                 <div style={{fontSize:12,color:'var(--text-muted)'}}>{a.desc}</div>
@@ -131,9 +134,9 @@ export default function HomePage() {
         </div>
         <div className="mood-grid">
           {MOODS.map(m=>(
-            <motion.button key={m.key} className="mood-chip" onClick={()=>{sessionStorage.setItem('rhema_search_query', m.label); setActivePage('inspire')}} whileTap={{scale:0.92}} whileHover={{y:-3}}>
+            <motion.button key={m.key} className="mood-chip" onClick={()=>{sessionStorage.setItem('rhema_search_query', t(m.labelKey)); setActivePage('inspire')}} whileTap={{scale:0.92}} whileHover={{y:-3}}>
               <span className="mood-emoji">{m.emoji}</span>
-              <span className="mood-label">{m.label}</span>
+              <span className="mood-label">{t(m.labelKey)}</span>
             </motion.button>
           ))}
         </div>
@@ -147,13 +150,13 @@ export default function HomePage() {
         </div>
         <div className="card" style={{padding:0,overflow:'hidden'}}>
           {[
-            {emoji:'🔖',text:`${savedVerses.length} ${t('savedVersesCount')}`,sub:t('inYourCollection'),go:'saved'},
-            {emoji:'🙏',text:`${prayers.length} ${t('prayerRequests')}`,sub:`${prayers.filter(p=>p.answered).length} ${t('answered')}`,go:'prayer'},
-            {emoji:'🎙',text:`${sermons.length} ${t('sermonCount')}`,sub:t('inYourLibrary'),go:'sermon'},
+            {icon:'bookmark',text:`${savedVerses.length} ${t('savedVersesCount')}`,sub:t('inYourCollection'),go:'saved'},
+            {icon:'praying',text:`${prayers.length} ${t('prayerRequests')}`,sub:`${prayers.filter(p=>p.answered).length} ${t('answered')}`,go:'prayer'},
+            {icon:'megaphone',text:`${sermons.length} ${t('sermonCount')}`,sub:t('inYourLibrary'),go:'sermon'},
           ].map((item,i)=>(
             <motion.button key={i} onClick={()=>setActivePage(item.go)} whileHover={{background:'var(--gold-50)'}}
               style={{width:'100%',display:'flex',alignItems:'center',gap:14,padding:'14px 20px',cursor:'pointer',background:'none',border:'none',textAlign:'left',borderBottom:i<2?'1px solid var(--border-subtle)':'none',transition:'background var(--dur-fast) ease'}}>
-              <span style={{fontSize:22}}>{item.emoji}</span>
+              <Icon3D name={item.icon} tone="gold" active size={16} badgeSize={36}/>
               <div style={{flex:1}}>
                 <div style={{fontSize:14,fontWeight:500,color:'var(--text-primary)'}}>{item.text}</div>
                 <div style={{fontSize:12,color:'var(--text-muted)'}}>{item.sub}</div>

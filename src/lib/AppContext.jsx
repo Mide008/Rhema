@@ -1,6 +1,7 @@
 // src/lib/AppContext.jsx
 import React,{createContext,useContext,useState,useCallback,useEffect,useRef} from 'react'
 import { idbGet, idbSet } from './idb'
+import { startNotificationScheduler } from './notifications'
 const Ctx=createContext(null)
 function load(){try{const r=localStorage.getItem('rhema_v3');return r?JSON.parse(r):null}catch{return null}}
 function save(d){try{localStorage.setItem('rhema_v3',JSON.stringify(d))}catch{}}
@@ -12,6 +13,11 @@ const DSE=[{id:1,title:'Walking by Faith',topic:'Faith in difficult seasons',aud
 export function AppProvider({children}){
   const s=load()
   const[user,setUs]=useState(s?.user||DU)
+  const userRef=useRef(user)
+  useEffect(()=>{ userRef.current=user },[user])
+  useEffect(()=>{
+    return startNotificationScheduler(()=>userRef.current)
+  },[])
   const[savedVerses,setSaved]=useState(s?.savedVerses||DS)
   const[prayers,setPrayers]=useState(s?.prayers||DP)
   const[sermons,setSermons]=useState(s?.sermons||DSE)

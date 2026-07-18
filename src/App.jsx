@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 import BottomNav from '@/components/layout/BottomNav'
 import ToastStack from '@/components/ui/Toast'
+import OfflineBanner from '@/components/ui/OfflineBanner'
 
 const HomePage        = lazy(() => import('@/pages/HomePage'))
 const InspirePage     = lazy(() => import('@/pages/InspirePage'))
@@ -60,6 +61,7 @@ function Shell() {
   const { activePage } = useApp()
   return (
     <div className="app-shell">
+      <OfflineBanner/>
       <Sidebar/>
       <div className="main-content">
         <TopBar/>

@@ -22,7 +22,7 @@ function Toggle({checked,onChange}){
 export default function SettingsPage(){
   const {user,setUser,showToast}=useApp()
   const { t } = useTranslation()
-  const { canInstall, installed, promptInstall } = useInstallPrompt()
+  const { canInstall, installed, promptInstall, platform } = useInstallPrompt()
   const [open,setOpen]=useState(null)
   const [notifs,setNotifs]=useState({daily:true,sermon:false,prayer:false})
   const [deleteConfirm,setDeleteConfirm]=useState(false)
@@ -96,17 +96,36 @@ export default function SettingsPage(){
         <button className="btn btn-gold" style={{alignSelf:'flex-start'}} onClick={()=>showToast(t('profileSaved'),'✓')}>{t('saveProfile')}</button>
       </div>
     )},
-    {id:'install',emoji:'📲',label:t('installApp'),desc:installed?t('installedDesc'):(canInstall?t('installAvailable'):t('installUnavailable')),content:(
+    {id:'install',emoji:'📲',label:t('installApp'),desc:installed?t('installedDesc'):(platform.isIOS?'Add via Safari Share menu':(canInstall?t('installAvailable'):'Use browser menu → Install app')),content:(
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,padding:14,fontSize:13,color:'var(--gold-800)',lineHeight:1.65}}>
           {t('installDesc')}
         </div>
-        {installed
-          ?<div style={{fontSize:14,fontWeight:500,color:'var(--sage-600)',display:'flex',alignItems:'center',gap:8}}>✅ {t('installedDesc')}</div>
-          :<button className="btn btn-gold" disabled={!canInstall} onClick={async()=>{const c=await promptInstall();if(c?.outcome==='accepted')showToast(t('installedDesc'),'📲')}} style={{alignSelf:'flex-start',opacity:canInstall?1:0.5}}>
-            📲 {canInstall?t('installNow'):t('installUnavailable')}
+        {installed ? (
+          <div style={{fontSize:14,fontWeight:500,color:'var(--sage-600)',display:'flex',alignItems:'center',gap:8}}>✅ {t('installedDesc')}</div>
+        ) : platform.isIOS ? (
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <p style={{fontSize:13,color:'var(--text-muted)'}}>iPhone/iPad don't let apps trigger install automatically — Apple requires this manual step in Safari:</p>
+            <ol style={{fontSize:13.5,color:'var(--text-primary)',lineHeight:2,paddingLeft:20}}>
+              <li>Tap the <b>Share</b> icon <span style={{opacity:0.7}}>(square with an arrow, in Safari's toolbar)</span></li>
+              <li>Scroll down and tap <b>Add to Home Screen</b></li>
+              <li>Tap <b>Add</b> in the top right</li>
+            </ol>
+            {!platform.isSafari && <p style={{fontSize:12,color:'var(--terra-500)'}}>You're not in Safari right now — this only works from Safari, not Chrome/other browsers on iOS.</p>}
+          </div>
+        ) : canInstall ? (
+          <button className="btn btn-gold" onClick={async()=>{const c=await promptInstall();if(c?.outcome==='accepted')showToast(t('installedDesc'),'📲')}} style={{alignSelf:'flex-start'}}>
+            📲 {t('installNow')}
           </button>
-        }
+        ) : (
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            <p style={{fontSize:13,color:'var(--text-muted)'}}>Your browser hasn't offered an install prompt yet. Two things to try:</p>
+            <ul style={{fontSize:13.5,lineHeight:1.9,paddingLeft:20}}>
+              <li>Open the browser menu (⋮ or ⋯) and look for <b>Install app</b> / <b>Add to Home screen</b></li>
+              <li>If you tested this site before I fixed it, do a hard refresh (or clear site data) so your browser picks up the update</li>
+            </ul>
+          </div>
+        )}
       </div>
     )},
     {id:'appearance',emoji:'🔠',label:t('appearance')||'Appearance',desc:`${Math.round(fontScale*100)}% text size`,content:(
@@ -144,6 +163,9 @@ export default function SettingsPage(){
           </div>
         ))}
         {notifs.daily&&<div className="input-group"><label className="input-label">{t('dailyVerseTime')}</label><input type="time" className="input-field" value={user.notifTime||'07:00'} onChange={e=>upd('notifTime',e.target.value)}/></div>}
+        <div style={{background:'var(--gold-50)',border:'1px solid var(--border-gold)',borderRadius:10,padding:12,fontSize:12,color:'var(--gold-800)',lineHeight:1.6}}>
+          These fire once you've opened the app that day (foreground or recently backgrounded) — not a guaranteed alarm while the app is fully closed. A true background alarm needs push infrastructure we haven't built yet.
+        </div>
         <button className="btn btn-gold" style={{alignSelf:'flex-start'}} onClick={async()=>{
           upd('notifs', notifs)
           if ('Notification' in window) {
