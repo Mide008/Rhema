@@ -1,3 +1,4 @@
+// src/pages/DevotionalPage.jsx
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -29,8 +30,6 @@ function computeStreak(devotionals){
   const todayStr = new Date().toISOString().split('T')[0]
   let streak = 0
   let cursor = new Date()
-  // If today isn't logged yet, start counting from yesterday so opening
-  // today still shows an accurate "so far" streak instead of dropping to 0.
   if (!dates.has(todayStr)) cursor.setDate(cursor.getDate()-1)
   while (true) {
     const ds = cursor.toISOString().split('T')[0]
@@ -128,7 +127,7 @@ export default function DevotionalPage(){
                   </div>
                 </div>
                 <MagneticBtn onClick={generate} disabled={genLoading||loading} className="btn btn-primary btn-lg" style={{ width:'100%', justifyContent:'center', gap:10 }}>
-                  {genLoading ? <><span className="loading-dots"><span className="loading-dot"/><span className="loading-dot"/><span className="loading-dot"/></span> Preparing today's word…</> : <>☀️ Generate Today's Devotional</>}
+                  {genLoading ? <><span className="loading-dots"><span className="loading-dot"/><span className="loading-dot"/><span className="loading-dot"/></span> Preparing today's word…</> : <>☀️ {t('prepareDevotional')}</>}
                 </MagneticBtn>
               </div>
             </RevealCard>
