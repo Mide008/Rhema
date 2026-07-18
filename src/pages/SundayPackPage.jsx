@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Icon3D from '@/components/ui/Icon3D'
 import { useAI } from '@/lib/useAI'
 import { useApp } from '@/lib/AppContext'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -71,7 +72,7 @@ export default function SundayPackPage(){
       <RevealCard>
         <div style={{background:'var(--ink-900)',borderRadius:24,padding:32,position:'relative',overflow:'hidden',display:'flex',alignItems:'center',gap:20}}>
           <img src="https://images.unsplash.com/photo-1510751007277-36932aac9ebd?w=900&q=55&auto=format&fit=crop" alt="" aria-hidden="true" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.07}}/>
-          <motion.span animate={{scale:[1,1.1,1]}} transition={{duration:3,repeat:Infinity}} style={{fontSize:40,position:'relative',zIndex:1,flexShrink:0}}>📋</motion.span>
+          <motion.div animate={{scale:[1,1.06,1]}} transition={{duration:3,repeat:Infinity}} style={{position:'relative',zIndex:1,flexShrink:0}}><Icon3D name="church" tone="gold" active size={26} badgeSize={56}/></motion.div>
           <div style={{position:'relative',zIndex:1}}>
             <MotionHeadline text={t('sundayPackTitle')} as="h1" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(20px,3vw,28px)',fontWeight:400,color:'rgba(250,247,242,0.93)',marginBottom:4}}/>
             <p style={{fontSize:13,color:'rgba(250,247,242,0.44)',lineHeight:1.55}}>{t('sundayPackDesc')}</p>
@@ -162,7 +163,7 @@ export default function SundayPackPage(){
               :<div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {sundayPacks.map((p,i)=>(
                   <motion.div key={p.id} className="card" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} style={{display:'flex',alignItems:'center',gap:14,cursor:'pointer'}} onClick={()=>{setPack(p.content);setTopic(p.topic||p.title);setTab('Build')}}>
-                    <span style={{fontSize:28}}>📋</span>
+                    <Icon3D name="church" tone="gold" active size={17} badgeSize={45}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:14,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.title}</div>
                       <div style={{fontSize:11,color:'var(--text-muted)'}}>{p.date}</div>

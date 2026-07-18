@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Icon3D from '@/components/ui/Icon3D'
 import { useApp } from '@/lib/AppContext'
 import { useAI } from '@/lib/useAI'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -174,7 +175,7 @@ export default function SavedPage(){
               :<div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {sermons.map((s,i)=>(
                   <motion.div key={s.id} className="card" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} style={{display:'flex',alignItems:'center',gap:14}}>
-                    <span style={{fontSize:28}}>🎙</span>
+                    <Icon3D name="megaphone" tone="gold" active size={17} badgeSize={45}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:14,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{s.title||s.topic}</div>
                       <div style={{fontSize:11,color:'var(--text-muted)'}}>{s.audience} · {s.date}</div>
@@ -193,7 +194,7 @@ export default function SavedPage(){
               :<div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {studyGuides.map((g,i)=>(
                   <motion.div key={g.id} className="card" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} style={{display:'flex',alignItems:'center',gap:14}}>
-                    <span style={{fontSize:28}}>📚</span>
+                    <Icon3D name="library" tone="gold" active size={17} badgeSize={45}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:14,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.title||g.topic}</div>
                       <div style={{fontSize:11,color:'var(--text-muted)'}}>{g.groupType} · {g.date}</div>
@@ -213,7 +214,7 @@ export default function SavedPage(){
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {sundayPacks.map((p,i)=>(
                   <motion.div key={p.id} className="card" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} style={{display:'flex',alignItems:'center',gap:14}}>
-                    <span style={{fontSize:26}}>📋</span>
+                    <Icon3D name="church" tone="gold" active size={16} badgeSize={42}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:14,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.title}</div>
                       <div style={{fontSize:11,color:'var(--text-muted)'}}>{p.date}</div>
@@ -228,7 +229,7 @@ export default function SavedPage(){
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {socialPacks.map((p,i)=>(
                   <motion.div key={p.id} className="card" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}} style={{display:'flex',alignItems:'center',gap:14}}>
-                    <span style={{fontSize:26}}>📱</span>
+                    <Icon3D name="globe" tone="gold" active size={16} badgeSize={42}/>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:14,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.title}</div>
                       <div style={{fontSize:11,color:'var(--text-muted)'}}>{p.contentType} · {p.date}</div>

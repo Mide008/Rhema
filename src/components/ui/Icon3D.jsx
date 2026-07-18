@@ -59,7 +59,6 @@ const GLYPHS = {
 // wherever a structural icon appears (nav, quick actions, section headers).
 export default function Icon3D({ name, size = 22, badgeSize = 44, tone = 'gold', active = false }) {
   const glyph = GLYPHS[name] || GLYPHS.sparkle
-  const uid = `${name}-${tone}-${active ? 'a' : 'i'}`
   const tones = {
     gold: { from: '#F2D98A', to: '#B8862E', stroke: '#3A2A0E' },
     ink: { from: '#4A4438', to: '#1C1710', stroke: '#EFE6D4' },

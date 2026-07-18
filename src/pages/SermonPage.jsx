@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Icon3D from '@/components/ui/Icon3D'
 import { useAI } from '@/lib/useAI'
 import { languageLabelFor } from '@/lib/aiServices'
 import { useAIServices } from '@/lib/aiServices'
@@ -104,7 +105,7 @@ export default function SermonPage() {
       <RevealCard style={{marginBottom:24}}>
         <div style={{background:'var(--ink-900)',borderRadius:24,padding:'32px 36px',position:'relative',overflow:'hidden',display:'flex',alignItems:'center',gap:24}}>
           <img src="https://images.unsplash.com/photo-1490127252417-7c393f993ee4?w=900&q=55&auto=format&fit=crop" alt="" aria-hidden style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.07}}/>
-          <motion.span animate={{scale:[1,1.1,1]}} transition={{duration:3,repeat:Infinity}} style={{fontSize:44,position:'relative',zIndex:1,flexShrink:0}}>🎙</motion.span>
+          <motion.div animate={{scale:[1,1.06,1]}} transition={{duration:3,repeat:Infinity}} style={{position:'relative',zIndex:1,flexShrink:0}}><Icon3D name="megaphone" tone="gold" active size={26} badgeSize={56}/></motion.div>
           <div style={{position:'relative',zIndex:1}}>
             <div style={{fontSize:10,letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--gold-400)',marginBottom:8}}>{t('ministryTools')}</div>
             <MotionHeadline text={t('rhemaSermonStudio')} as="h1" style={{fontFamily:'var(--font-serif)',fontSize:'clamp(22px,3vw,30px)',fontWeight:400,color:'rgba(250,247,242,0.95)',marginBottom:6}}/>
