@@ -11,7 +11,7 @@ import { RevealCard } from '@/components/ui/MotionComponents'
 
 export default function BiblePage(){
   const { t } = useTranslation()
-  const {saveVerse,savedVerses,showToast,setActivePage,setPendingVerse,verseNotes,addVerseNote,pendingChapter,setPendingChapter}=useApp()
+  const {saveVerse,savedVerses,showToast,setActivePage,setPendingVerse,verseNotes,addVerseNote,pendingChapter,setPendingChapter,pendingScrollToVerse,setPendingScrollToVerse}=useApp()
   const {ask,loading}=useAI()
   const [view,setView]=useState('books')
   const [book,setBook]=useState(null)
@@ -36,6 +36,7 @@ export default function BiblePage(){
       setCh(Math.min(pendingChapter.chapter,found.chapters))
       if(pendingChapter.translation)setTran(pendingChapter.translation)
       setView('reading')
+      // We don't set anything for scrolling here; pendingScrollToVerse will be handled separately
     }
     setPendingChapter(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,6 +54,20 @@ export default function BiblePage(){
     })
     return ()=>{cancelled=true}
   },[view,book,ch,tran])
+
+  // NEW: Scroll to verse when pendingScrollToVerse is set and verses have loaded
+  useEffect(()=>{
+    if(!pendingScrollToVerse || chapterLoading || verses.length===0) return
+    const target=verses.find(v=>v.v===pendingScrollToVerse)
+    if(target){
+      setSelected(target)
+      setTimeout(()=>{
+        const el=document.getElementById(`verse-${target.v}`)
+        if(el)el.scrollIntoView({behavior:'smooth',block:'center'})
+      },150)
+    }
+    setPendingScrollToVerse(null)
+  },[verses,chapterLoading,pendingScrollToVerse,setPendingScrollToVerse])
 
   const filtered=BIBLE_BOOKS.filter(b=>{
     const tm=testament==='All'||b.testament===testament
@@ -186,7 +201,7 @@ export default function BiblePage(){
                 </div>
               )}
               {!chapterLoading&&verses.map(v=>(
-                <span key={v.v} style={{cursor:'pointer'}} onClick={()=>openAction(v)}>
+                <span key={v.v} id={`verse-${v.v}`} style={{cursor:'pointer'}} onClick={()=>openAction(v)}>
                   <sup style={{fontSize:10,fontWeight:600,color:'var(--gold-600)',marginRight:3,verticalAlign:'super'}}>{v.v}</sup>
                   <span style={{fontFamily:'var(--font-serif)',fontSize:'clamp(16px,2vw,18px)',color:selected?.v===v.v?'var(--ink-900)':'var(--ink-700)',background:selected?.v===v.v?'rgba(212,168,75,0.18)':'transparent',borderRadius:3,padding:'1px 2px',transition:'all var(--dur-fast) ease',lineHeight:1.9}}>
                     {v.text}{' '}

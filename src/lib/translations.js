@@ -2,6 +2,7 @@
 export const translations = {
   en: {
     weeklyFocusLabel: 'This week\'s focus',
+    verseActionGoToBible: '📍 Go to Bible',
     weeklyFocusDesc: 'A curated space to reflect, pray, and grow around one theme at a time.',
     exploreThisWeek: 'Explore this week',
     cookieTitle: 'Your privacy',
@@ -451,6 +452,7 @@ export const translations = {
   },
   fr: {
     weeklyFocusLabel: 'Le thème de la semaine',
+    verseActionGoToBible: '📍 Aller à la Bible',
     weeklyFocusDesc: 'Un espace pensé pour méditer, prier et grandir autour d\'un thème à la fois.',
     exploreThisWeek: 'Explorer cette semaine',
     cookieTitle: 'Votre vie privée',
@@ -875,6 +877,7 @@ export const translations = {
   },
   es: {
     weeklyFocusLabel: 'El enfoque de esta semana',
+    verseActionGoToBible: '📍 Ir a la Biblia',
     weeklyFocusDesc: 'Un espacio pensado para reflexionar, orar y crecer en torno a un tema a la vez.',
     exploreThisWeek: 'Explorar esta semana',
     cookieTitle: 'Tu privacidad',
@@ -1299,6 +1302,7 @@ export const translations = {
   },
   pcm: {
     weeklyFocusLabel: 'Wetin we dey focus on dis week',
+    verseActionGoToBible: '📍 Go Bible',
     weeklyFocusDesc: 'Space wey we prepare make you fit reflect, pray, and grow for one theme at a time.',
     exploreThisWeek: 'Explore dis week',
     cookieTitle: 'Your privacy',
@@ -1723,6 +1727,7 @@ export const translations = {
   },
   yo: {
     weeklyFocusLabel: 'Ohun tí a fojú sí ọ̀sẹ̀ yìí',
+    verseActionGoToBible: '📍 Lọ sí Bíbélì',
     weeklyFocusDesc: 'Ààyè kan láti ronú, gbàdúrà, kí o sì dàgbà nípa àkòrí kan ní àkókò kan.',
     exploreThisWeek: 'Ṣàwárí ọ̀sẹ̀ yìí',
     cookieTitle: 'Ìpamọ́ ìkọ̀kọ̀ rẹ',
@@ -2147,6 +2152,7 @@ export const translations = {
   },
   ig: {
     weeklyFocusLabel: 'Ihe a na-elekwasị anya izu a',
+    verseActionGoToBible: "📍 Gaa n'Akwụkwọ Nsọ",
     weeklyFocusDesc: 'Ohere e debere iji tụgharịa uche, kpee ekpere, na iji too gbasara otu isiokwu n otu oge.',
     exploreThisWeek: 'Nyochaa izu a',
     cookieTitle: 'Nzuzo gị',

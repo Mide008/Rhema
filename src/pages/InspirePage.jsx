@@ -1,3 +1,4 @@
+// src/pages/InspirePage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '@/lib/AppContext'
@@ -8,8 +9,14 @@ import { MOODS } from '@/lib/bibleData'
 import { RevealCard } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
 
+function parseRefForBible(ref) {
+  const m = ref.match(/^(.+?)\s+(\d+):(\d+)/)
+  if (!m) return null
+  return { bookName: m[1].trim(), chapter: parseInt(m[2],10), verse: parseInt(m[3],10) }
+}
+
 export default function InspirePage() {
-  const { showToast, setActivePage, user, setPendingVerse } = useApp()
+  const { showToast, setActivePage, user, setPendingVerse, setPendingChapter, setPendingScrollToVerse } = useApp()
   const { ask, loading, error } = useAI()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
@@ -73,8 +80,6 @@ export default function InspirePage() {
           setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
         }
       } else {
-        // ask() returned null — all AI engines failed. Surface the real reason
-        // instead of doing nothing (this was the root cause of "search does nothing").
         showToast(error || t('aiRequestFailed'), '❌')
       }
     } catch (err) {
@@ -256,6 +261,19 @@ export default function InspirePage() {
                   className="btn btn-outline btn-sm"
                 >
                   📚 {t('verseActionAddStudy')}
+                </button>
+                <button
+                  onClick={() => {
+                    const parsed = parseRefForBible(verse.reference)
+                    if (!parsed) { showToast('Could not locate that verse in the Bible Reader', '⚠️'); return }
+                    setPendingChapter({ bookName: parsed.bookName, chapter: parsed.chapter, translation: user.translation||'KJV' })
+                    setPendingScrollToVerse(parsed.verse)
+                    setActivePage('bible')
+                    showToast(`Opening ${verse.reference} in Bible`, '📖')
+                  }}
+                  className="btn btn-outline btn-sm"
+                >
+                  📍 {t('verseActionGoToBible')}
                 </button>
               </div>
             </motion.div>

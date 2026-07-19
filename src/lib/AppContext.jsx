@@ -36,10 +36,6 @@ export function AppProvider({children}){
     window.history.pushState({page},'',`?page=${page}`)
   },[])
   useEffect(()=>{
-    // Seed the initial history entry so the very first back-press has a real
-    // browser history state to resolve to, and wire real browser back/forward
-    // (and the mobile back-gesture, which fires the same popstate event) to
-    // in-app navigation instead of leaving the page or doing nothing.
     window.history.replaceState({page:activePage},'',`?page=${activePage}`)
     const onPopState=(e)=>setActivePageRaw(e.state?.page||'home')
     window.addEventListener('popstate',onPopState)
@@ -51,6 +47,8 @@ export function AppProvider({children}){
   useEffect(()=>{ localStorage.setItem('rhema_sidebar_collapsed', sidebarCollapsed?'1':'0') },[sidebarCollapsed])
   const[pendingVerse,setPendingVerse]=useState(null)
   const[pendingChapter,setPendingChapter]=useState(null)
+  // NEW: explicit state for scrolling to a specific verse after chapter loads
+  const[pendingScrollToVerse,setPendingScrollToVerse]=useState(null)
   const restoredFromIdb=useRef(false)
 
   useEffect(()=>{
@@ -102,6 +100,7 @@ export function AppProvider({children}){
     sidebarCollapsed,setSidebarCollapsed,
     pendingVerse,setPendingVerse,
     pendingChapter,setPendingChapter,
+    pendingScrollToVerse,setPendingScrollToVerse, // NEW
   }}>{children}</Ctx.Provider>)
 }
 export function useApp(){const c=useContext(Ctx);if(!c)throw new Error('useApp outside AppProvider');return c}

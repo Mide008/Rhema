@@ -7,8 +7,14 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { RevealCard } from '@/components/ui/MotionComponents'
 import EmptyState from '@/components/ui/EmptyState'
 
+function parseRefForBible(ref) {
+  const m = ref.match(/^(.+?)\s+(\d+):(\d+)/)
+  if (!m) return null
+  return { bookName: m[1].trim(), chapter: parseInt(m[2],10), verse: parseInt(m[3],10) }
+}
+
 export default function SearchPage() {
-  const { showToast, user, setActivePage, setPendingVerse } = useApp()
+  const { showToast, user, setActivePage, setPendingVerse, setPendingChapter, setPendingScrollToVerse } = useApp()
   const { ask, loading, error } = useAI()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
@@ -161,6 +167,19 @@ export default function SearchPage() {
                   className="btn btn-outline btn-sm"
                 >
                   🙏 {t('verseActionAddPrayer')}
+                </button>
+                <button
+                  onClick={() => {
+                    const parsed = parseRefForBible(verse.reference)
+                    if (!parsed) { showToast('Could not locate that verse in the Bible Reader', '⚠️'); return }
+                    setPendingChapter({ bookName: parsed.bookName, chapter: parsed.chapter, translation: user.translation||'KJV' })
+                    setPendingScrollToVerse(parsed.verse)
+                    setActivePage('bible')
+                    showToast(`Opening ${verse.reference} in Bible`, '📖')
+                  }}
+                  className="btn btn-outline btn-sm"
+                >
+                  📍 {t('verseActionGoToBible')}
                 </button>
               </div>
             </div>

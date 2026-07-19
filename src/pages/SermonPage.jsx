@@ -1,3 +1,4 @@
+// src/pages/SermonPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon3D from '@/components/ui/Icon3D'
@@ -16,8 +17,8 @@ const DEN=['Pentecostal / Charismatic','Anglican / Episcopal','Baptist','Catholi
 const LEN=['10-minute message','20-minute message','30-minute message','45-minute sermon','60-minute sermon']
 const TONE=['Teaching','Inspirational','Evangelistic','Pastoral','Revival']
 
-function copyText(t, showToast) { navigator.clipboard.writeText(t).catch(()=>{}); showToast(showToast, '📋') }
-function shareWA(t, showToast) { window.open(`https://wa.me/?text=${encodeURIComponent(t)}`,'_blank'); showToast(showToast, '💬') }
+function copyText(t, showToast) { navigator.clipboard.writeText(t).catch(()=>{}); showToast(t, '📋') }
+function shareWA(t, showToast) { window.open(`https://wa.me/?text=${encodeURIComponent(t)}`,'_blank'); showToast(t, '💬') }
 
 export default function SermonPage() {
   const { t } = useTranslation()
